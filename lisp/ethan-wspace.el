@@ -1,16 +1,13 @@
 ;;; ethan-wspace.el
 ;;; Whitespace customizations.
 ;;
+;; For more information on the design of this package, please see the
+;; README that came with it.
+;;
 ;; Editing whitespace. I don't like to forcibly clean[1] whitespace
 ;; because when doing diffs/checkins, it pollutes changesets. However,
 ;; I prefer clean whitespace -- often I've deleted whitespace by
 ;; accident and been unable to "put it back" for purposes of diffing.
-;;
-;; [1] "Clean" whitespace, to me, means always using spaces instead of
-;; tabs and no trailing whitespace at end of line. Additionally I
-;; prefer to end each file with a newline, for many of the same
-;; reasons; although this can be considered "clean" whitespace, it
-;; probably deservesto be treated separately.
 ;;
 ;; Therefore, my approach is hybrid -- maintain clean whitespace where
 ;; possible, and avoid disturbing messy whitespce when I come across
