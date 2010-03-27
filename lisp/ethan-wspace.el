@@ -102,9 +102,9 @@ Used as a find-file-hook. (Seems to run after font-lock-mode hooks.)"
         t
       nil)))
 
-(add-hook 'find-file-hook 'clean-whitespace-check)
+;(add-hook 'find-file-hook 'clean-whitespace-check)
 ; FIXME: gosh, write-files-functions, before-save-hook, write-contents-functions
-(add-hook 'before-save-hook 'clean-whitespace-tentative)
+;(add-hook 'before-save-hook 'clean-whitespace-tentative)
 
 ;;; Showing whitespace
 ;;
@@ -156,9 +156,9 @@ Used as a find-file-hook. (Seems to run after font-lock-mode hooks.)"
 
 ; FIXME: compute this color based on the current color-theme
 (setq space-color "#562626")
-(set-face-background 'show-ws-tab space-color)
+;(set-face-background 'show-ws-tab space-color)
 ; FIXME: show-ws-trailing-whitespace should be strongly deprecated!
-(set-face-background 'show-ws-trailing-whitespace space-color)
-(set-face-background 'trailing-whitespace space-color)
+;(set-face-background 'show-ws-trailing-whitespace space-color)
+;(set-face-background 'trailing-whitespace space-color)
 
 (provide 'ethan-wspace)
