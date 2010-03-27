@@ -122,7 +122,19 @@ Options recognized: :find :clean :highlight"
   "Check for any instance of this wspace type at all.
 
 Returns t or nil."
-  (not (null (ethan-wspace-type-find type-or-name))))
+  (when (ethan-wspace-type-find type-or-name) t))
+
+
+;;; TABS
+(defvar ethan-wspace-type-tabs-regexp "\t+"
+  "The regexp to use when searching for tabs.")
+
+
+(defun ethan-wspace-type-tabs-find ()
+  (save-excursion
+    (goto-char (point-min))
+    (let ((pos (re-search-forward ethan-wspace-type-tabs-regexp nil t)))
+      (when pos (cons (match-beginning 0) (match-end 0))))))
 
 (ethan-wspace-declare-type 'tabs :find 'ethan-wspace-type-tabs-find
                            )
