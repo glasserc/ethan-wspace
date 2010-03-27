@@ -59,11 +59,83 @@
 ; FIXME: These are all essentially minor modes, should be able to turn
 ; them off?
 
-(defvar buffer-whitespace-was-clean nil
-  "Keep track, per-buffer, whether the whitespace was clean initially.
+(defvar ethan-wspace-buffer-errors nil
+  "Keep track, per-buffer, which whitespace errors a file has.
 
-Used by clean-whitespace-tentative and show-ws.")
-(make-variable-buffer-local 'buffer-whitespace-was-clean)
+For possible values, see ethan-wspace-errors.")
+(make-variable-buffer-local 'ethan-wspace-buffer-errors)
+
+(defvar ethan-wspace-builtin-errors '(tabs trailing trailing-newline)
+  "The list of errors that are recognized by default.")
+
+(defvar ethan-wspace-errors '(tabs trailing trailing-newline)
+  "The list of errors that a user wants recognized.
+
+FIXME: This variable should be customizable.")
+
+(defface ethan-wspace-face
+  '((t (:background "red")))
+  "FIXME: compute this from color-theme or something")
+
+
+;; Need to set up something like yas/global-mode, which turns on/off
+;; ethan-wspace globally
+
+;; Each type of whitespace has:
+;; - a find function, which when run, returns (begin end) of the next instance
+;;   of this whitespace (or nil if none)
+;; - a clean function, which is run to eliminate this kind of whitespace.
+;; - a highlight function, which is run with one argument -- 1 to turn
+;;   it on, -1 to turn it off.
+(defun ethan-wspace-declare-type (name &rest args)
+  "Declare a whitespace type.
+
+Options recognized: :find :clean :highlight"
+  (setq ethan-wspace-types (cons (ethan-wspace-make-type name args) ethan-wspace-types)))
+
+;; We store the whitespace types here.
+;; Currently each whitespace type is represented as an association list
+;; with keys :check, :clean, and :highlight, and values symbols of functions
+;; or whatever.
+(defvar ethan-wspace-types nil
+  "The list of all known whitespace types.")
+
+;; Define the format/structure for the each wspace type. Right now it's
+;; (name . (:foo bar :baz quux)).
+(defun ethan-wspace-make-type (name args)
+  (cons name args))
+
+(defun ethan-wspace-get-type (name)
+  (assq name ethan-wspace-types))
+
+(defun ethan-wspace-type-get-field (type field)
+  (plist-get (cdr type) field))
+
+(defun ethan-wspace-type-find (type-or-name)
+  (let* ((type (if (symbolp type-or-name)
+                  (ethan-wspace-get-type type-or-name)
+                type-or-name))
+         (find-func (ethan-wspace-type-get-field type :find)))
+    (apply find-func)))
+
+(defun ethan-wspace-type-check (type-or-name)
+  "Check for any instance of this wspace type at all.
+
+Returns t or nil."
+  (not (null (ethan-wspace-type-find type-or-name))))
+
+(ethan-wspace-declare-type 'tabs :find 'ethan-wspace-type-tabs-find
+                           )
+
+(defun ethan-wspace-find-file-hook ()
+  (let ((wspace-types (ethan-wspace-normalize-types ethan-wspace-errors)))
+    (mapcar '(lambda (type)
+               (if ((ethan-wspace-type-check type))
+                   ()))
+            ))
+
+            wspace-types)
+
 
 (defun clean-whitespace ()
   "Clean the whitespace in a buffer -- strip trailing whitespace and untabify."
