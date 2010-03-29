@@ -201,15 +201,15 @@ Used as a find-file-hook. (Seems to run after font-lock-mode hooks.)"
 (defvar dont-show-ws-this-buffer nil)
 (make-variable-buffer-local 'dont-show-ws-this-buffer)
 
-(require 'show-wspace)
-(add-hook 'font-lock-mode-hook
-          (lambda ()
-            (if (and (buffer-file-name)
-                     (not dont-show-ws-this-buffer)
-                     (not (buffer-whitespace-clean-p)))
-                (progn
-                  (show-ws-highlight-tabs)
-                  (setq show-trailing-whitespace t)))))
+;; (require 'show-wspace)
+;; (add-hook 'font-lock-mode-hook
+;;           (lambda ()
+;;             (if (and (buffer-file-name)
+;;                      (not dont-show-ws-this-buffer)
+;;                      (not (buffer-whitespace-clean-p)))
+;;                 (progn
+;;                   (show-ws-highlight-tabs)
+;;                   (setq show-trailing-whitespace t)))))
 
 (defun dont-show-ws ()
 ;  (setq show-trailing-whitespace nil)  ; I have this variable customized
