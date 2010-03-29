@@ -129,14 +129,29 @@ Returns t or nil."
 (defvar ethan-wspace-type-tabs-regexp "\t+"
   "The regexp to use when searching for tabs.")
 
-
 (defun ethan-wspace-type-tabs-find ()
   (save-excursion
     (goto-char (point-min))
     (let ((pos (re-search-forward ethan-wspace-type-tabs-regexp nil t)))
       (when pos (cons (match-beginning 0) (match-end 0))))))
 
+(defvar ethan-wspace-type-tabs-keyword
+  (list ethan-wspace-type-tabs-regexp 0 (list 'quote 'ethan-wspace-face) t)
+  "The font-lock keyword used to highlight tabs.")
+
+(defun ethan-wspace-type-tabs-highlight (&optional value)
+  (interactive)
+  (let ((onoff (if value value
+                 (if (member ethan-wspace-type-tabs-keyword font-lock-keywords)
+                     -1  ; turn off
+                   1)))) ; turn on
+    (if (< 0 onoff)
+        (font-lock-add-keywords nil (list ethan-wspace-type-tabs-keyword))
+      (font-lock-remove-keywords nil (list ethan-wspace-type-tabs-keyword)))))
+
+
 (ethan-wspace-declare-type 'tabs :find 'ethan-wspace-type-tabs-find
+                           :clean 'untabify :highlight 'ethan-wspace-type-tabs-highlight
                            )
 
 (defun ethan-wspace-find-file-hook ()
