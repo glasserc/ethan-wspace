@@ -87,6 +87,7 @@ FIXME: This variable should be customizable.")
 ;; - a clean function, which is run to eliminate this kind of whitespace.
 ;; - a highlight function, which is run with one argument -- 1 to turn
 ;;   it on, -1 to turn it off.
+;; Probably should be defining minor modes for each of these?
 (defun ethan-wspace-declare-type (name &rest args)
   "Declare a whitespace type.
 
@@ -139,15 +140,20 @@ Returns t or nil."
   (list ethan-wspace-type-tabs-regexp 0 (list 'quote 'ethan-wspace-face) t)
   "The font-lock keyword used to highlight tabs.")
 
+(defun ethan-wspace-type-tabs-highlight-p ()
+  "Return t if ethan-wspaces-type-tabs highlighting is on."
+  (if (member (list ethan-wspace-type-tabs-keyword) font-lock-keywords)
+      t
+    nil))
+
 (defun ethan-wspace-type-tabs-highlight (&optional value)
   (interactive)
   (let ((onoff (if value value
-                 (if (member ethan-wspace-type-tabs-keyword font-lock-keywords)
-                     -1  ; turn off
-                   1)))) ; turn on
+                 (if (ethan-wspace-type-tabs-highlight-p) -1 1))))
     (if (< 0 onoff)
         (font-lock-add-keywords nil (list ethan-wspace-type-tabs-keyword))
-      (font-lock-remove-keywords nil (list ethan-wspace-type-tabs-keyword)))))
+      (font-lock-remove-keywords nil (list ethan-wspace-type-tabs-keyword)))
+    (font-lock-fontify-buffer)))
 
 
 (ethan-wspace-declare-type 'tabs :find 'ethan-wspace-type-tabs-find
