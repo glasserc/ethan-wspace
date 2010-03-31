@@ -86,7 +86,7 @@ FIXME: This variable should be customizable.")
 ;;   of this whitespace (or nil if none)
 ;; - a clean function, which is run to eliminate this kind of whitespace.
 ;; - a highlight function, which is run with one argument -- 1 to turn
-;;   it on, -1 to turn it off.
+;;   it on, -1 to turn it off. This is probably be a minor mode.
 ;; Probably should be defining minor modes for each of these?
 (defun ethan-wspace-declare-type (name &rest args)
   "Declare a whitespace type.
@@ -141,8 +141,11 @@ Returns t or nil."
   "The font-lock keyword used to highlight tabs.")
 
 (define-minor-mode ethan-wspace-type-tabs-highlight
-  "Highlight tabs."
-  nil nil nil
+  "Minor mode to highlight tabs.
+
+With arg, turn tab-highlighting on if arg is positive, off otherwise.
+This supercedes (require 'show-wspace) and show-ws-highlight-tabs."
+  :init-value nil :lighter nil :keymap nil
   (if ethan-wspace-type-tabs-highlight
       (font-lock-add-keywords nil (list ethan-wspace-type-tabs-keyword))
     (font-lock-remove-keywords nil (list ethan-wspace-type-tabs-keyword)))
