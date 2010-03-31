@@ -140,21 +140,13 @@ Returns t or nil."
   (list ethan-wspace-type-tabs-regexp 0 (list 'quote 'ethan-wspace-face) t)
   "The font-lock keyword used to highlight tabs.")
 
-(defun ethan-wspace-type-tabs-highlight-p ()
-  "Return t if ethan-wspaces-type-tabs highlighting is on."
-  (if (member (list ethan-wspace-type-tabs-keyword) font-lock-keywords)
-      t
-    nil))
-
-(defun ethan-wspace-type-tabs-highlight (&optional value)
-  (interactive)
-  (let ((onoff (if value value
-                 (if (ethan-wspace-type-tabs-highlight-p) -1 1))))
-    (if (< 0 onoff)
-        (font-lock-add-keywords nil (list ethan-wspace-type-tabs-keyword))
-      (font-lock-remove-keywords nil (list ethan-wspace-type-tabs-keyword)))
-    (font-lock-fontify-buffer)))
-
+(define-minor-mode ethan-wspace-type-tabs-highlight
+  "Highlight tabs."
+  nil nil nil
+  (if ethan-wspace-type-tabs-highlight
+      (font-lock-add-keywords nil (list ethan-wspace-type-tabs-keyword))
+    (font-lock-remove-keywords nil (list ethan-wspace-type-tabs-keyword)))
+  (font-lock-fontify-buffer))
 
 (ethan-wspace-declare-type 'tabs :find 'ethan-wspace-type-tabs-find
                            :clean 'untabify :highlight 'ethan-wspace-type-tabs-highlight
