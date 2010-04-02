@@ -96,19 +96,36 @@ Options recognized: :find :clean :highlight :description
 
    (let* ((name-str (symbol-name name))
         (clean-mode-name (concat "ethan-wspace-clean-" name-str "-mode"))
+        (clean-mode (intern clean-mode-name))
         (highlight-mode-name (concat "ethan-wspace-highlight-" name-str "-mode"))
+        (highlight-mode (intern highlight-mode-name))
         (description (or (plist-get args :description)
                          name-str)))
   `(progn
       (setq ethan-wspace-types (cons (ethan-wspace-make-type ',name ',args) ethan-wspace-types))
-     (define-minor-mode ,(intern clean-mode-name)
+     (define-minor-mode ,clean-mode
        ,(format "Verify that %s are clean in this buffer.
 
 Works as a save-file hook that cleans %s.
 Turning this mode on turns off highlighting %s, and vice versa." description description description)
        :init-value nil :lighter nil :keymap nil
-       (,(intern highlight-mode-name) -1)
+       ;; FIXME: Body goes here
 )
+
+
+     ,(let ((disable-highlight (intern (concat clean-mode-name "-disable-highlight")))
+            (disable-clean     (intern (concat highlight-mode-name "-disable-clean"))))
+        ;; Defining these as symbols so that multiple loads don't
+        ;; add multiple functions
+        `(progn
+           (defun ,disable-highlight ()
+             (when ,clean-mode (,highlight-mode -1)))
+           (defun ,disable-clean ()
+             (when ,highlight-mode (,clean-mode -1)))
+           (add-hook ',(intern (concat clean-mode-name "-hook"))
+                     ',disable-highlight)
+           (add-hook ',(intern (concat highlight-mode-name "-hook"))
+                     ',disable-clean)))
    )
 ))
 
