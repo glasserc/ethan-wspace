@@ -88,11 +88,32 @@ FIXME: This variable should be customizable.")
 ;; - a highlight function, which is run with one argument -- 1 to turn
 ;;   it on, -1 to turn it off. This is probably be a minor mode.
 ;; Probably should be defining minor modes for each of these?
-(defun ethan-wspace-declare-type (name &rest args)
+(defmacro ethan-wspace-declare-type (name &rest args)
   "Declare a whitespace type.
 
-Options recognized: :find :clean :highlight"
-  (setq ethan-wspace-types (cons (ethan-wspace-make-type name args) ethan-wspace-types)))
+Options recognized: :find :clean :highlight :description
+:description is used in docstrings and should be plural."
+
+  (message "Expanding declare-type call for %s" name)
+  (let* ((name-str (symbol-name name))
+        (clean-mode-name (concat "ethan-wspace-clean-" name-str "-mode"))
+        (highlight-mode-name (concat "ethan-wspace-highlight-" name-str "-mode"))
+        (description (or (plist-get args :description)
+                         name-str)))
+  `(progn
+     (message "Evaluating expanded macro for %s" ',name)
+     (setq ethan-wspace-types (cons (ethan-wspace-make-type ',name ',args) ethan-wspace-types))
+     (define-minor-mode ,(intern clean-mode-name)
+       ,(format "Verify that %s are clean in this buffer.
+
+Works as a save-file hook that cleans %s.
+Turning this mode on turns off highlighting %s, and vice versa." description description description)
+       :init-value nil :lighter nil :keymap nil
+       (,(intern highlight-mode-name) -1)
+)
+     (message ,(format "OK, just called define-minor-mode for %s" clean-mode-name))
+  )
+))
 
 ;; We store the whitespace types here.
 ;; Currently each whitespace type is represented as an association list
@@ -140,19 +161,19 @@ Returns t or nil."
   (list ethan-wspace-type-tabs-regexp 0 (list 'quote 'ethan-wspace-face) t)
   "The font-lock keyword used to highlight tabs.")
 
-(define-minor-mode ethan-wspace-type-tabs-highlight
+(define-minor-mode ethan-wspace-highlight-tabs-mode
   "Minor mode to highlight tabs.
 
 With arg, turn tab-highlighting on if arg is positive, off otherwise.
 This supercedes (require 'show-wspace) and show-ws-highlight-tabs."
   :init-value nil :lighter nil :keymap nil
-  (if ethan-wspace-type-tabs-highlight
+  (if ethan-wspace-highlight-tabs-mode
       (font-lock-add-keywords nil (list ethan-wspace-type-tabs-keyword))
     (font-lock-remove-keywords nil (list ethan-wspace-type-tabs-keyword)))
   (font-lock-fontify-buffer))
 
-(ethan-wspace-declare-type 'tabs :find 'ethan-wspace-type-tabs-find
-                           :clean 'untabify :highlight 'ethan-wspace-type-tabs-highlight
+(ethan-wspace-declare-type tabs :find 'ethan-wspace-type-tabs-find
+                           :clean 'untabify :highlight 'ethan-wspace-highlight-tabs-mode
                            )
 
 (defun ethan-wspace-find-file-hook ()
