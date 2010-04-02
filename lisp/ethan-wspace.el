@@ -94,15 +94,13 @@ FIXME: This variable should be customizable.")
 Options recognized: :find :clean :highlight :description
 :description is used in docstrings and should be plural."
 
-  (message "Expanding declare-type call for %s" name)
-  (let* ((name-str (symbol-name name))
+   (let* ((name-str (symbol-name name))
         (clean-mode-name (concat "ethan-wspace-clean-" name-str "-mode"))
         (highlight-mode-name (concat "ethan-wspace-highlight-" name-str "-mode"))
         (description (or (plist-get args :description)
                          name-str)))
   `(progn
-     (message "Evaluating expanded macro for %s" ',name)
-     (setq ethan-wspace-types (cons (ethan-wspace-make-type ',name ',args) ethan-wspace-types))
+      (setq ethan-wspace-types (cons (ethan-wspace-make-type ',name ',args) ethan-wspace-types))
      (define-minor-mode ,(intern clean-mode-name)
        ,(format "Verify that %s are clean in this buffer.
 
@@ -111,8 +109,7 @@ Turning this mode on turns off highlighting %s, and vice versa." description des
        :init-value nil :lighter nil :keymap nil
        (,(intern highlight-mode-name) -1)
 )
-     (message ,(format "OK, just called define-minor-mode for %s" clean-mode-name))
-  )
+   )
 ))
 
 ;; We store the whitespace types here.
