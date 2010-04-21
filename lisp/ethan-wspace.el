@@ -65,10 +65,10 @@
 For possible values, see ethan-wspace-errors.")
 (make-variable-buffer-local 'ethan-wspace-buffer-errors)
 
-(defvar ethan-wspace-builtin-errors '(tabs trailing trailing-newline)
-  "The list of errors that are recognized by default.")
+;; (defvar ethan-wspace-builtin-errors '(tabs trailing trailing-newline)
+;;   "The list of errors that are recognized by default.")
 
-(defvar ethan-wspace-errors '(tabs trailing trailing-newline)
+(defvar ethan-wspace-errors '(tabs) ;;; '(tabs trailing trailing-newline)
   "The list of errors that a user wants recognized.
 
 FIXME: This variable should be customizable.")
@@ -142,7 +142,8 @@ Turning this mode on turns off highlighting %s, and vice versa." description des
   (cons name args))
 
 (defun ethan-wspace-get-type (name)
-  (assq name ethan-wspace-types))
+  (or (assq name ethan-wspace-types)
+      (error "Type '%s' does not exist" name)))
 
 (defun ethan-wspace-type-get-field (type field)
   (plist-get (cdr type) field))
@@ -152,7 +153,7 @@ Turning this mode on turns off highlighting %s, and vice versa." description des
                   (ethan-wspace-get-type type-or-name)
                 type-or-name))
          (find-func (ethan-wspace-type-get-field type :find)))
-    (apply find-func)))
+    (apply find-func nil)))
 
 (defun ethan-wspace-type-check (type-or-name)
   "Check for any instance of this wspace type at all.
@@ -160,6 +161,24 @@ Turning this mode on turns off highlighting %s, and vice versa." description des
 Returns t or nil."
   (when (ethan-wspace-type-find type-or-name) t))
 
+(defun ethan-wspace-type-activate (type-name)
+  (if (ethan-wspace-type-check type-name)
+     (ethan-wspace-type-activate-highlight type-name)
+    (ethan-wspace-type-activate-clean type-name)))
+
+(defun ethan-wspace-type-activate-clean (type-name)
+  ;;; FIXME: robust against non-stringy type-name?
+  ;;; FIXME: refactor with combined activate-highlight?
+  (let* ((name-str (if (symbolp type-name) (symbol-name type-name) type-name))
+         (clean-mode-name (concat "ethan-wspace-clean-" name-str "-mode"))
+         (clean-mode (intern clean-mode-name)))
+    (apply clean-mode '(1))))
+
+(defun ethan-wspace-type-activate-highlight (type-name)
+  (let* ((name-str (if (symbolp type-name) (symbol-name type-name) type-name))
+         (highlight-mode-name (concat "ethan-wspace-highlight-" name-str "-mode"))
+         (highlight-mode (intern highlight-mode-name)))
+    (apply highlight-mode '(1))))
 
 ;;; TABS
 (defvar ethan-wspace-type-tabs-regexp "\t+"
@@ -186,19 +205,27 @@ This supercedes (require 'show-wspace) and show-ws-highlight-tabs."
     (font-lock-remove-keywords nil (list ethan-wspace-type-tabs-keyword)))
   (font-lock-fontify-buffer))
 
-(ethan-wspace-declare-type tabs :find 'ethan-wspace-type-tabs-find
-                           :clean 'untabify :highlight 'ethan-wspace-highlight-tabs-mode
+(ethan-wspace-declare-type tabs :find ethan-wspace-type-tabs-find
+                           :clean untabify :highlight ethan-wspace-highlight-tabs-mode
                            )
 
-(defun ethan-wspace-find-file-hook ()
-  (let ((wspace-types (ethan-wspace-normalize-types ethan-wspace-errors)))
-    (mapcar '(lambda (type)
-               (if ((ethan-wspace-type-check type))
-                   ()))
-            ))
+(define-minor-mode ethan-wspace-mode
+  "Minor mode for coping with whitespace.
 
-            wspace-types)
+This just activates each whitespace type in this buffer."
+  :init-value nil :lighter nil :keymap nil
+  ;(message "Turning on ethan-wspace mode for %s" (buffer-file-name))
+  (dolist (type ethan-wspace-errors)
+    (ethan-wspace-type-activate type)))
 
+(defun ethan-wspace-is-buffer-appropriate ()
+  ;;; FIXME: not OK for diff mode, non-file modes, etc?
+  (when (buffer-file-name)
+    (ethan-wspace-mode 1)))
+
+(define-global-minor-mode global-ethan-wspace-mode
+  ethan-wspace-mode ethan-wspace-is-buffer-appropriate
+  :init-value t)
 
 (defun clean-whitespace ()
   "Clean the whitespace in a buffer -- strip trailing whitespace and untabify."
