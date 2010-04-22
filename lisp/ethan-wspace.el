@@ -55,9 +55,9 @@
 ;; highlight if it's not?
 ;;
 ;; FIXME: trailing-newlines aren't there at all?
-;
-; FIXME: These are all essentially minor modes, should be able to turn
-; them off?
+;;
+;; FIXME: What's the "best" approach to looping in elisp? I'm using dolist,
+;; but that may require cl-macs?
 
 (defvar ethan-wspace-buffer-errors nil
   "Keep track, per-buffer, which whitespace errors a file has.
@@ -161,6 +161,16 @@ Turning this mode on turns off highlighting %s, and vice versa." description des
 Returns t or nil."
   (when (ethan-wspace-type-find type-or-name) t))
 
+(defun ethan-wspace-type-clean (type-or-name &optional begin end)
+  (let* ((type (if (symbolp type-or-name)
+                  (ethan-wspace-get-type type-or-name)
+                type-or-name))
+         (clean-func (ethan-wspace-type-get-field type :clean))
+         (real-begin (or begin (point-min)))
+         (real-end (or end (point-max))))
+    (apply clean-func (list real-begin real-end))))
+  
+
 (defun ethan-wspace-type-activate (type-name)
   (if (ethan-wspace-type-check type-name)
      (ethan-wspace-type-activate-highlight type-name)
@@ -173,6 +183,13 @@ Returns t or nil."
          (clean-mode-name (concat "ethan-wspace-clean-" name-str "-mode"))
          (clean-mode (intern clean-mode-name)))
     (apply clean-mode '(1))))
+
+(defun ethan-wspace-type-clean-mode-active (type-name)
+  (let* ((name-str (if (symbolp type-name) (symbol-name type-name) type-name))
+         (clean-mode-name (concat "ethan-wspace-clean-" name-str "-mode"))
+         (clean-mode (intern clean-mode-name))
+         (clean-mode-active (eval clean-mode)))
+    clean-mode-active))
 
 (defun ethan-wspace-type-activate-highlight (type-name)
   (let* ((name-str (if (symbolp type-name) (symbol-name type-name) type-name))
@@ -226,6 +243,14 @@ This just activates each whitespace type in this buffer."
 (define-global-minor-mode global-ethan-wspace-mode
   ethan-wspace-mode ethan-wspace-is-buffer-appropriate
   :init-value t)
+
+(defun ethan-wspace-clean-before-save-hook ()
+  (when ethan-wspace-mode
+    (dolist (type ethan-wspace-errors)
+      (when (ethan-wspace-type-clean-mode-active type)
+          (ethan-wspace-type-clean type)))))
+
+(add-hook 'before-save-hook 'ethan-wspace-clean-before-save-hook)
 
 (defun clean-whitespace ()
   "Clean the whitespace in a buffer -- strip trailing whitespace and untabify."
