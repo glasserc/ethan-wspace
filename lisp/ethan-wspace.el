@@ -207,6 +207,50 @@ Returns t or nil."
     (let ((pos (re-search-forward ethan-wspace-type-tabs-regexp nil t)))
       (when pos (cons (match-beginning 0) (match-end 0))))))
 
+(defun ethan-wspace-untabify (start end)
+  "Like `untabify', but be more respectful of point.
+The standard `untabify' does not keep track of point when
+deleting tabs and replacing with spaces. This means point can
+jump to the beginning of a tab if it was at the end of a tab when
+untabify was called.
+
+Since we clean tabs implicitly, we don't want point to jump around.
+For details on how we accomplish this, see the source."
+  ;; Stock untabify does three things that cause this problem together:
+  ;;
+  ;; 1. untabify deletes tabs before inserting spaces, which collapses
+  ;;    the point-before-tabs and point-after-tabs cases.
+  ;;
+  ;; 2. save-excursion saves position of point using a marker, but
+  ;;    since the insertion type of that marker is nil, inserting
+  ;;    spaces before the marker don't move the marker. This is fine
+  ;;    when point-before-tabs but wrong when point-after-tabs.  (We
+  ;;    use insert-before-markers instead of indent-to-column to
+  ;;    handle this.)
+  ;;
+  ;; 3. Point could be between two tabs, but untabify replaces
+  ;;    multiple tabs at once, which is guaranteed to give you the
+  ;;    wrong result.
+  (interactive "r")
+  (save-excursion
+    (save-restriction
+      (narrow-to-region (point-min) end)
+      (goto-char start)
+      (while (search-forward "\t" nil t)        ; faster than re-search
+        (forward-char -1)
+        (let ((tab-beg (point))
+              (indent-tabs-mode nil))
+          ;; Only do one tab character at a time, in case point is between two tabs
+          (forward-char)
+          (let* ((tab-end (point))
+                (tab-count (- tab-end tab-beg)))
+            ;; Insert text after tabs, but before markers, so that
+            ;; point-marker (if after tab) will be advanced.
+            (insert-before-markers (make-string (* tab-count tab-width) ?\ ))
+            ;; Delete tabs afterwards, instead of before, so we can handle before-tabs
+            ;; and after-tabs separately.
+            (delete-region tab-beg tab-end)))))))
+
 (defvar ethan-wspace-type-tabs-keyword
   (list ethan-wspace-type-tabs-regexp 0 (list 'quote 'ethan-wspace-face) t)
   "The font-lock keyword used to highlight tabs.")
@@ -223,7 +267,7 @@ This supercedes (require 'show-wspace) and show-ws-highlight-tabs."
   (font-lock-fontify-buffer))
 
 (ethan-wspace-declare-type tabs :find ethan-wspace-type-tabs-find
-                           :clean untabify :highlight ethan-wspace-highlight-tabs-mode
+                           :clean ethan-wspace-untabify :highlight ethan-wspace-highlight-tabs-mode
                            )
 
 (define-minor-mode ethan-wspace-mode
