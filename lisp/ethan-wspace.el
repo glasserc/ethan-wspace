@@ -237,19 +237,13 @@ For details on how we accomplish this, see the source."
       (narrow-to-region (point-min) end)
       (goto-char start)
       (while (search-forward "\t" nil t)        ; faster than re-search
-        (forward-char -1)
-        (let ((tab-beg (point))
-              (indent-tabs-mode nil))
-          ;; Only do one tab character at a time, in case point is between two tabs
-          (forward-char)
-          (let* ((tab-end (point))
-                (tab-count (- tab-end tab-beg)))
-            ;; Insert text after tabs, but before markers, so that
-            ;; point-marker (if after tab) will be advanced.
-            (insert-before-markers (make-string (* tab-count tab-width) ?\ ))
-            ;; Delete tabs afterwards, instead of before, so we can handle before-tabs
-            ;; and after-tabs separately.
-            (delete-region tab-beg tab-end)))))))
+        (let ((tab-loc (- (point) 1)))
+          ;; Insert text after tabs, but before markers, so that
+          ;; point-marker (if after tab) will be advanced.
+          (insert-before-markers (make-string tab-width ?\ ))
+          ;; Delete tabs, so we can handle before-tabs and after-tabs
+          ;; separately.
+          (delete-region tab-loc (1+ tab-loc)))))))
 
 (defvar ethan-wspace-type-tabs-keyword
   (list ethan-wspace-type-tabs-regexp 0 (list 'quote 'ethan-wspace-face) t)
@@ -307,35 +301,7 @@ This just activates each whitespace type in this buffer."
     (untabify (point-min) (point-max)))
   nil)
 
-(defun clean-whitespace-tentative ()
-  "If the whitespace for this buffer started clean, preserve cleanliness.
-
-Used as a save-file-hook."
-  (if buffer-whitespace-was-clean
-      (clean-whitespace)
-    nil))
-
-(defun clean-whitespace-check ()
-  "Sets buffer-local variable buffer-whitespace-was-clean if there's nothing weird in the whitespace.
-
-Used as a find-file-hook. (Seems to run after font-lock-mode hooks.)"
-  ; FIXME: weird buffers, like if you open a binary file?
   ; FIXME: if interactive, report current status of ws
-  (interactive)
-  (setq buffer-whitespace-was-clean (buffer-whitespace-clean-p)))
-
-(defun buffer-whitespace-clean-p ()
-  (save-excursion
-    (goto-char (point-min))
-    (if (not (or
-         (re-search-forward "\t" nil t)
-         (re-search-forward "[ \t]+$" nil t)))
-        t
-      nil)))
-
-;(add-hook 'find-file-hook 'clean-whitespace-check)
-; FIXME: gosh, write-files-functions, before-save-hook, write-contents-functions
-;(add-hook 'before-save-hook 'clean-whitespace-tentative)
 
 ;;; Showing whitespace
 ;;
