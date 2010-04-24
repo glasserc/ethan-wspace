@@ -237,13 +237,17 @@ For details on how we accomplish this, see the source."
       (narrow-to-region (point-min) end)
       (goto-char start)
       (while (search-forward "\t" nil t)        ; faster than re-search
-        (let ((tab-loc (- (point) 1)))
-          ;; Insert text after tabs, but before markers, so that
-          ;; point-marker (if after tab) will be advanced.
-          (insert-before-markers (make-string tab-width ?\ ))
-          ;; Delete tabs, so we can handle before-tabs and after-tabs
-          ;; separately.
-          (delete-region tab-loc (1+ tab-loc)))))))
+        (forward-char -1)
+        (let ((tab-start (point))
+              (column-start (current-column)))
+          (forward-char 1)
+          (let ((column-end (current-column)))
+            ;; Insert text after tabs, but before markers, so that
+            ;; point-marker (if after tab) will be advanced.
+            (insert-before-markers (make-string (- column-end column-start) ?\ ))
+            ;; Delete tabs, so we can handle before-tabs and after-tabs
+            ;; separately.
+            (delete-region tab-start (1+ tab-start))))))))
 
 (defvar ethan-wspace-type-tabs-keyword
   (list ethan-wspace-type-tabs-regexp 0 (list 'quote 'ethan-wspace-face) t)
