@@ -102,7 +102,7 @@ Options recognized: :find :clean :highlight :description
         (description (or (plist-get args :description)
                          name-str)))
   `(progn
-      (setq ethan-wspace-types (cons (ethan-wspace-make-type ',name ',args) ethan-wspace-types))
+     (setq ethan-wspace-types (cons (ethan-wspace-make-type ',name ',args) ethan-wspace-types))
      (define-minor-mode ,clean-mode
        ,(format "Verify that %s are clean in this buffer.
 
@@ -169,7 +169,7 @@ Returns t or nil."
          (real-begin (or begin (point-min)))
          (real-end (or end (point-max))))
     (apply clean-func (list real-begin real-end))))
-  
+
 
 (defun ethan-wspace-type-activate (type-name)
   (if (ethan-wspace-type-check type-name)
