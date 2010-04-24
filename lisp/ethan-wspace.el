@@ -68,7 +68,7 @@ For possible values, see ethan-wspace-errors.")
 ;; (defvar ethan-wspace-builtin-errors '(tabs trailing trailing-newline)
 ;;   "The list of errors that are recognized by default.")
 
-(defvar ethan-wspace-errors '(tabs) ;;; '(tabs trailing trailing-newline)
+(defvar ethan-wspace-errors '(tabs eol) ;;; '(tabs trailing trailing-newline)
   "The list of errors that a user wants recognized.
 
 FIXME: This variable should be customizable.")
@@ -268,6 +268,35 @@ This supercedes (require 'show-wspace) and show-ws-highlight-tabs."
                            :clean ethan-wspace-untabify :highlight ethan-wspace-highlight-tabs-mode
                            )
 
+;; Trailing whitespace on each line: symbol `eol', lighter L.  Named
+;; "eol" to distinguish from final-newline whitespace (ensuring that
+;; there is exactly one newline at EOF).
+(defvar ethan-wspace-type-eol-regexp "\\s-+$"
+  "The regexp to use to find end-of-line whitespace.")
+
+(defun ethan-wspace-type-eol-find ()
+  (save-excursion
+    (goto-char (point-min))
+    (let ((pos (re-search-forward ethan-wspace-type-eol-regexp nil t)))
+      (when pos (cons (match-beginning 0) (match-end 0))))))
+
+;;; Implemented using show-trailing-whitespace.
+;;;
+;;; emacs core handles show-trailing-whitespace specially. It's
+;;; impossible (AFAICT) to use font-lock keywords to highlight
+;;; trailing whitespace except when point is right afterwards.
+(define-minor-mode ethan-wspace-highlight-eol-mode
+  "Minor mode to highlight trailing whitespace.
+
+With arg, turn highlighting on if arg is positive, off otherwise.
+This internally uses `show-trailing-whitespace'."
+  :init-value nil :lighter nil :keymap nil
+  (setq show-trailing-whitespace ethan-wspace-highlight-eol-mode))
+
+(ethan-wspace-declare-type eol :find ethan-wspace-type-eol-find
+                           :clean delete-trailing-whitespace
+                           :highlight ethan-wspace-highlight-eol-mode)
+
 (define-minor-mode ethan-wspace-mode
   "Minor mode for coping with whitespace.
 
@@ -356,10 +385,13 @@ This just activates each whitespace type in this buffer."
 
 
 ; FIXME: compute this color based on the current color-theme
-(setq space-color "#562626")
+;(setq space-color "#562626")
 ;(set-face-background 'show-ws-tab space-color)
 ; FIXME: show-ws-trailing-whitespace should be strongly deprecated!
 ;(set-face-background 'show-ws-trailing-whitespace space-color)
 ;(set-face-background 'trailing-whitespace space-color)
 
+;; show-trailing-whitespace uses the face `trailing-whitespace', so we
+;; make this mirror `ethan-wspace-face'.
+(copy-face 'ethan-wspace-face 'trailing-whitespace)
 (provide 'ethan-wspace)
