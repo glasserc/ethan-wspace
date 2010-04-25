@@ -84,7 +84,7 @@
   ;; this slightly ugly mechanism that stores symbols uniquely in an
   ;; association list, and then pulls out the names.
   (let ((type-names nil))
-    (mapcar '(lambda (type-name) (aput 'type-names type-name t)) ethan-wspace-types)
+    (mapcar '(lambda (type) (aput 'type-names (car type) t)) ethan-wspace-types)
     (mapcar 'car type-names)))
 
 (defun ethan-wspace-buffer-errors ()
@@ -182,6 +182,13 @@ If absent, use the whole buffer."
          (real-end (or end (point-max))))
     (apply clean-func (list real-begin real-end))))
 
+(defun ethan-wspace-type-clean-mode-symbol (type-name)
+  "Return the symbol-name of the variable for the clean-mode for `type-name'.
+
+For example, (ethan-wspace-type-clean-mode-symbol 'tabs) => 'ethan-wspace-type-tabs-clean-mode."
+  (let* ((name-str (if (symbolp type-name) (symbol-name type-name) type-name))
+         (clean-mode-name (concat "ethan-wspace-clean-" name-str "-mode")))
+    (intern clean-mode-name)))
 
 (defun ethan-wspace-type-activate (type-name)
   "Turn \"on\" the whitespace type given by `type-name'.
@@ -194,25 +201,16 @@ type."
     (ethan-wspace-type-activate-clean type-name)))
 
 (defun ethan-wspace-type-activate-clean (type-name)
-  ;;; FIXME: robust against non-stringy type-name?
-  ;;; FIXME: refactor with combined activate-highlight?
-  (let* ((name-str (if (symbolp type-name) (symbol-name type-name) type-name))
-         (clean-mode-name (concat "ethan-wspace-clean-" name-str "-mode"))
-         (clean-mode (intern clean-mode-name)))
+  (let ((clean-mode (ethan-wspace-type-clean-mode-symbol type-name)))
     (apply clean-mode '(1))))
 
 (defun ethan-wspace-type-clean-mode-active (type-name)
-  (let* ((name-str (if (symbolp type-name) (symbol-name type-name) type-name))
-         (clean-mode-name (concat "ethan-wspace-clean-" name-str "-mode"))
-         (clean-mode (intern clean-mode-name))
-         (clean-mode-active (eval clean-mode)))
-    clean-mode-active))
+  (let ((clean-mode (ethan-wspace-type-clean-mode-symbol type-name)))
+    (eval clean-mode)))
 
 (defun ethan-wspace-type-activate-highlight (type-name)
-  ;; FIXME: this needs to get the highlight function from the type definition.
-  (let* ((name-str (if (symbolp type-name) (symbol-name type-name) type-name))
-         (highlight-mode-name (concat "ethan-wspace-highlight-" name-str "-mode"))
-         (highlight-mode (intern highlight-mode-name)))
+  (let* ((type (ethan-wspace-get-type type-name))
+         (highlight-mode (ethan-wspace-type-get-field type :highlight)))
     (apply highlight-mode '(1))))
 
 
@@ -322,10 +320,6 @@ This internally uses `show-trailing-whitespace'."
 (ethan-wspace-declare-type eol :find ethan-wspace-type-eol-find
                            :clean ethan-wspace-type-eol-clean
                            :highlight ethan-wspace-highlight-eol-mode)
-
-;; show-trailing-whitespace uses the face `trailing-whitespace', so we
-;; make this mirror `ethan-wspace-face'.
-(copy-face 'ethan-wspace-face 'trailing-whitespace)
 
 
 ;;; End-of-file newlines: symbol `trailing-newline'
@@ -473,6 +467,10 @@ With arg, turn highlighting on if arg is positive, off otherwise."
   '((t (:background "red")))
   "FIXME: compute this from color-theme or something"
   :group 'ethan-wspace)
+
+;; show-trailing-whitespace uses the face `trailing-whitespace', so we
+;; make this mirror `ethan-wspace-face'.
+(copy-face 'ethan-wspace-face 'trailing-whitespace)
 
 (define-minor-mode ethan-wspace-mode
   "Minor mode for coping with whitespace.
