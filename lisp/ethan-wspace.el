@@ -74,7 +74,7 @@
 ;; (defvar ethan-wspace-builtin-errors '(tabs trailing trailing-newline)
 ;;   "The list of errors that are recognized by default.")
 
-(defvar ethan-wspace-errors '(tabs eol) ;;; '(tabs trailing trailing-newline)
+(defvar ethan-wspace-errors '(tabs eol trailing-nls)
   "The list of errors that a user wants recognized.
 
 FIXME: This variable should be customizable.")
@@ -346,6 +346,17 @@ This internally uses `show-trailing-whitespace'."
           (cons max max)
         (cons (- max (1- trailing-newlines)) max)))))
 
+(defun ethan-wspace-type-trailing-nls-clean (begin end)
+  (save-match-data
+    (save-excursion
+      (goto-char (point-max))
+      (skip-chars-backward "\n")
+      (if (not (looking-at "\n"))
+          (insert "\n")          ; insert missing newline (respectful of point)
+        (forward-char)                          ; skip a newline
+        (delete-region (point) (point-max)))))) ; delete others
+
+
 ;;; This is a failed attempt at using a font-lock keyword to look for
 ;;; trailing newlines.  It doesn't work because there's no regexp that
 ;;; matches EOF. I'm keeping it here in case I want to use the
@@ -444,6 +455,11 @@ With arg, turn highlighting on if arg is positive, off otherwise."
       (ethan-wspace-highlight-trailing-nls-update-overlay-too-many))
      (t
       (ethan-wspace-highlight-trailing-nls-update-overlay-off)))))
+
+(ethan-wspace-declare-type trailing-nls :find ethan-wspace-type-trailing-nls-find
+                           :clean ethan-wspace-type-trailing-nls-clean
+                           :highlight ethan-wspace-highlight-trailing-nls-mode
+                           :description "trailing newlines")
 
 ;;; ethan-wspace-mode: doing stuff for all types.
 (define-minor-mode ethan-wspace-mode
