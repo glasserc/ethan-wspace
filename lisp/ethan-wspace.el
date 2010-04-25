@@ -59,7 +59,39 @@
 ;;
 ;; FIXME: coding conventions suggest adding a ethan-wspace-unload-hook to unhook
 
+;; We store the whitespace types here.
+;; Currently each whitespace type is represented as an association list
+;; with keys :check, :clean, and :highlight, and values symbols of functions
+;; or whatever.
+(defvar ethan-wspace-types nil
+  "The list of all known whitespace types.")
 
+;; Define the format/structure for the each wspace type. Right now it's
+;; (name . (:foo bar :baz quux)), aka (name :foo bar :baz :quux).
+(defun ethan-wspace-add-type (name args)
+  (aput 'ethan-wspace-types name args))
+
+(defun ethan-wspace-get-type (name)
+  (or (assq name ethan-wspace-types)
+      (error "Ethan Wspace Type '%s' does not exist" name)))
+
+(defun ethan-wspace-type-get-field (type field)
+  (plist-get (cdr type) field))
+
+(defun ethan-wspace-all-error-types ()
+  "The list of all currently-defined types."
+  ;; Repeated loads could define types multiple times, so we define
+  ;; this slightly ugly mechanism that stores symbols uniquely in an
+  ;; association list, and then pulls out the names.
+  (let ((type-names nil))
+    (mapcar '(lambda (type-name) (aput 'type-names type-name t)) ethan-wspace-types)
+    (mapcar 'car type-names)))
+
+(defun ethan-wspace-buffer-errors ()
+  (let ((errors nil))
+    (dolist (type (ethan-wspace-all-error-types))
+      (when (eval (ethan-wspace-type-clean-mode-symbol type))
+        (setq errors (cons type errors))))))
 ;; This variable isn't used. FIXME: provide a function that returns
 ;; this as a list, for use in customizations.
 
@@ -68,21 +100,6 @@
 
 ;; For possible values, see ethan-wspace-errors.")
 ;; (make-variable-buffer-local 'ethan-wspace-buffer-errors)
-
-;; This variable isn't used. FIXME: provide a function that does this?
-
-;; (defvar ethan-wspace-builtin-errors '(tabs trailing trailing-newline)
-;;   "The list of errors that are recognized by default.")
-
-(defvar ethan-wspace-errors '(tabs eol trailing-nls)
-  "The list of errors that a user wants recognized.
-
-FIXME: This variable should be customizable.")
-
-(defface ethan-wspace-face
-  '((t (:background "red")))
-  "FIXME: compute this from color-theme or something")
-
 
 ;; Need to set up something like yas/global-mode, which turns on/off
 ;; ethan-wspace globally
@@ -108,7 +125,7 @@ Options recognized: :find :clean :highlight :description
         (description (or (plist-get args :description)
                          name-str)))
   `(progn
-     (setq ethan-wspace-types (cons (ethan-wspace-make-type ',name ',args) ethan-wspace-types))
+     (ethan-wspace-add-type ',name ',args)
      (define-minor-mode ,clean-mode
        ,(format "Verify that %s are clean in this buffer.
 
@@ -134,25 +151,6 @@ Turning this mode on turns off highlighting %s, and vice versa." description des
                      ',disable-clean)))
    )
 ))
-
-;; We store the whitespace types here.
-;; Currently each whitespace type is represented as an association list
-;; with keys :check, :clean, and :highlight, and values symbols of functions
-;; or whatever.
-(defvar ethan-wspace-types nil
-  "The list of all known whitespace types.")
-
-;; Define the format/structure for the each wspace type. Right now it's
-;; (name . (:foo bar :baz quux)), aka (name :foo bar :baz :quux).
-(defun ethan-wspace-make-type (name args)
-  (cons name args))
-
-(defun ethan-wspace-get-type (name)
-  (or (assq name ethan-wspace-types)
-      (error "Ethan Wspace Type '%s' does not exist" name)))
-
-(defun ethan-wspace-type-get-field (type field)
-  (plist-get (cdr type) field))
 
 (defun ethan-wspace-type-find (type-or-name)
   "Call the find function for wspace type `type-or-name'.
@@ -462,6 +460,20 @@ With arg, turn highlighting on if arg is positive, off otherwise."
                            :description "trailing newlines")
 
 ;;; ethan-wspace-mode: doing stuff for all types.
+(defgroup ethan-wspace nil
+  "Be extremely OCD about whitespace in files."
+  :link '(emacs-library-link :tag "Lisp Source" "ethan-wspace.el")
+  :group 'programming)
+
+(defcustom ethan-wspace-errors (ethan-wspace-all-error-types)
+  "The list of errors that a user wants recognized."
+  :group 'ethan-wspace)
+
+(defface ethan-wspace-face
+  '((t (:background "red")))
+  "FIXME: compute this from color-theme or something"
+  :group 'ethan-wspace)
+
 (define-minor-mode ethan-wspace-mode
   "Minor mode for coping with whitespace.
 
