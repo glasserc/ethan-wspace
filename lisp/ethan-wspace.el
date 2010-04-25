@@ -46,18 +46,17 @@
 ;; '(show-trailing-whitespace t)
 ;; show-trailing-whitespace will be turned on by ethan-wspace.
 ;;
-;; I would re-implement show-trailing-whitespace, but it's handled
-;; specially by the emacs core. Probably just as well..
-;;
-;; FIXME: treat separately the trailing-whitespace, tabs, and
-;; end-with-newline thing? But basically all three are the same --
-;; check on find-file whether it's fine, and fix it if it is, and
-;; highlight if it's not?
-;;
 ;; FIXME: trailing-newlines aren't there at all?
 ;;
-;; FIXME: What's the "best" approach to looping in elisp? I'm using dolist,
-;; but that may require cl-macs?
+;; FIXME: Coding conventions suggest using (define-* thing-name) for generated stuff.
+;;
+;; FIXME: function to clean-ws the whole file and activate all clean-modes?
+;;
+;; FIXME: fancy lighter
+;;
+;; FIXME: buffer-local-ize ethan-wspace-errors
+;;
+;; FIXME: coding conventions suggest adding a ethan-wspace-unload-hook to unhook
 
 (defvar ethan-wspace-buffer-errors nil
   "Keep track, per-buffer, which whitespace errors a file has.
@@ -322,19 +321,6 @@ This just activates each whitespace type in this buffer."
           (ethan-wspace-type-clean type)))))
 
 (add-hook 'before-save-hook 'ethan-wspace-clean-before-save-hook)
-
-(defun clean-whitespace ()
-  "Clean the whitespace in a buffer -- strip trailing whitespace and untabify."
-  ; FIXME: (interactive)?
-  ; Clean active region if any, otherwise whole buffer.
-; This could use nuke-trailing-whitespace and friends, but that wouldn't
-; untabify
-  (save-excursion
-    (delete-trailing-whitespace)
-    (untabify (point-min) (point-max)))
-  nil)
-
-  ; FIXME: if interactive, report current status of ws
 
 ;;; Showing whitespace
 ;;
