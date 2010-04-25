@@ -316,8 +316,13 @@ This internally uses `show-trailing-whitespace'."
   :init-value nil :lighter nil :keymap nil
   (setq show-trailing-whitespace ethan-wspace-highlight-eol-mode))
 
+(defun ethan-wspace-type-eol-clean (begin end)
+  (save-restriction
+    (narrow-to-region begin end)
+    (delete-trailing-whitespace)))
+
 (ethan-wspace-declare-type eol :find ethan-wspace-type-eol-find
-                           :clean delete-trailing-whitespace
+                           :clean ethan-wspace-type-eol-clean
                            :highlight ethan-wspace-highlight-eol-mode)
 
 ;; show-trailing-whitespace uses the face `trailing-whitespace', so we
