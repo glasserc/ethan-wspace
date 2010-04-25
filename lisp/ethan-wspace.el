@@ -289,8 +289,25 @@ This supercedes (require 'show-wspace) and show-ws-highlight-tabs."
 ;; Trailing whitespace on each line: symbol `eol', lighter L.  Named
 ;; "eol" to distinguish from final-newline whitespace (ensuring that
 ;; there is exactly one newline at EOF).
-(defvar ethan-wspace-type-eol-regexp "\\s-+$"
-  "The regexp to use to find end-of-line whitespace.")
+
+(defvar ethan-wspace-blank-chars (list ?\t ?\ (decode-char 'ucs #x3000))
+  "The list of blank (non-newline whitespace) characters we know about.
+
+This list is used to highlight and clean invisible whitespace at
+end of line.
+
+Right now this includes tab (0x09), blank (x20), and fullwidth
+space (x3000). If there is a whitespace character used more
+commonly in your language, email me.")
+
+(defvar ethan-wspace-type-eol-regexp (concat "[" ethan-wspace-blank-chars "]+$")
+  "The regexp to use to find end-of-line whitespace.
+
+We use a hard-coded list of whitespace `ethan-wspace-blank-chars'
+rather than \\s- because \"\\s-+$\" matches \"\\n\\n\" -- which
+leads us to treat multiple newlines as trailing end-of-line
+whitespace. If there is a whitespace character used more commonly
+in your language, email me.")
 
 (defun ethan-wspace-type-eol-find ()
   (save-excursion
