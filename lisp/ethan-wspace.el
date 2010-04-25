@@ -46,7 +46,8 @@
 ;; '(show-trailing-whitespace t)
 ;; show-trailing-whitespace will be turned on by ethan-wspace.
 ;;
-;; FIXME: trailing-newlines aren't there at all?
+;; Also disable '(require-final-newlines t); ethan-wspace will handle
+;; the final newlines.
 ;;
 ;; FIXME: Coding conventions suggest using (define-* thing-name) for generated stuff.
 ;;
@@ -58,11 +59,17 @@
 ;;
 ;; FIXME: coding conventions suggest adding a ethan-wspace-unload-hook to unhook
 
-(defvar ethan-wspace-buffer-errors nil
-  "Keep track, per-buffer, which whitespace errors a file has.
 
-For possible values, see ethan-wspace-errors.")
-(make-variable-buffer-local 'ethan-wspace-buffer-errors)
+;; This variable isn't used. FIXME: provide a function that returns
+;; this as a list, for use in customizations.
+
+;; (defvar ethan-wspace-buffer-errors nil
+;; "Keep track, per-buffer, which whitespace errors a file has.
+
+;; For possible values, see ethan-wspace-errors.")
+;; (make-variable-buffer-local 'ethan-wspace-buffer-errors)
+
+;; This variable isn't used. FIXME: provide a function that does this?
 
 ;; (defvar ethan-wspace-builtin-errors '(tabs trailing trailing-newline)
 ;;   "The list of errors that are recognized by default.")
@@ -86,7 +93,7 @@ FIXME: This variable should be customizable.")
 ;; - a clean function, which is run to eliminate this kind of whitespace.
 ;; - a highlight function, which is run with one argument -- 1 to turn
 ;;   it on, -1 to turn it off. This is probably be a minor mode.
-;; Probably should be defining minor modes for each of these?
+;; FIXME: change to define-ethan-wspace-type?
 (defmacro ethan-wspace-declare-type (name &rest args)
   "Declare a whitespace type.
 
@@ -136,21 +143,25 @@ Turning this mode on turns off highlighting %s, and vice versa." description des
   "The list of all known whitespace types.")
 
 ;; Define the format/structure for the each wspace type. Right now it's
-;; (name . (:foo bar :baz quux)).
+;; (name . (:foo bar :baz quux)), aka (name :foo bar :baz :quux).
 (defun ethan-wspace-make-type (name args)
   (cons name args))
 
 (defun ethan-wspace-get-type (name)
   (or (assq name ethan-wspace-types)
-      (error "Type '%s' does not exist" name)))
+      (error "Ethan Wspace Type '%s' does not exist" name)))
 
 (defun ethan-wspace-type-get-field (type field)
   (plist-get (cdr type) field))
 
 (defun ethan-wspace-type-find (type-or-name)
+  "Call the find function for wspace type `type-or-name'.
+
+Type can be either the symbol name of the type, or the type
+object itself."
   (let* ((type (if (symbolp type-or-name)
-                  (ethan-wspace-get-type type-or-name)
-                type-or-name))
+                   (ethan-wspace-get-type type-or-name)
+                 type-or-name))
          (find-func (ethan-wspace-type-get-field type :find)))
     (apply find-func nil)))
 
@@ -161,6 +172,10 @@ Returns t or nil."
   (when (ethan-wspace-type-find type-or-name) t))
 
 (defun ethan-wspace-type-clean (type-or-name &optional begin end)
+  "Calls the clean function for wspace type `type-or-name'.
+
+Optional `begin' and `end' are the range to clean.
+If absent, use the whole buffer."
   (let* ((type (if (symbolp type-or-name)
                   (ethan-wspace-get-type type-or-name)
                 type-or-name))
@@ -171,6 +186,11 @@ Returns t or nil."
 
 
 (defun ethan-wspace-type-activate (type-name)
+  "Turn \"on\" the whitespace type given by `type-name'.
+
+If the whitespace for this type is clean, turn on the clean-mode
+for this type. Otherwise, turn on the highlight mode for this
+type."
   (if (ethan-wspace-type-check type-name)
      (ethan-wspace-type-activate-highlight type-name)
     (ethan-wspace-type-activate-clean type-name)))
@@ -191,11 +211,13 @@ Returns t or nil."
     clean-mode-active))
 
 (defun ethan-wspace-type-activate-highlight (type-name)
+  ;; FIXME: this needs to get the highlight function from the type definition.
   (let* ((name-str (if (symbolp type-name) (symbol-name type-name) type-name))
          (highlight-mode-name (concat "ethan-wspace-highlight-" name-str "-mode"))
          (highlight-mode (intern highlight-mode-name)))
     (apply highlight-mode '(1))))
 
+
 ;;; TABS
 (defvar ethan-wspace-type-tabs-regexp "\t+"
   "The regexp to use when searching for tabs.")
@@ -267,6 +289,7 @@ This supercedes (require 'show-wspace) and show-ws-highlight-tabs."
                            :clean ethan-wspace-untabify :highlight ethan-wspace-highlight-tabs-mode
                            )
 
+
 ;; Trailing whitespace on each line: symbol `eol', lighter L.  Named
 ;; "eol" to distinguish from final-newline whitespace (ensuring that
 ;; there is exactly one newline at EOF).
@@ -283,7 +306,8 @@ This supercedes (require 'show-wspace) and show-ws-highlight-tabs."
 ;;;
 ;;; emacs core handles show-trailing-whitespace specially. It's
 ;;; impossible (AFAICT) to use font-lock keywords to highlight
-;;; trailing whitespace except when point is right afterwards.
+;;; trailing whitespace except when point is right afterwards, so we
+;;; just use show-trailing-whitespace.
 (define-minor-mode ethan-wspace-highlight-eol-mode
   "Minor mode to highlight trailing whitespace.
 
@@ -296,14 +320,31 @@ This internally uses `show-trailing-whitespace'."
                            :clean delete-trailing-whitespace
                            :highlight ethan-wspace-highlight-eol-mode)
 
-;;; End-of-file newlines: symbol `trailing-newline'
-(defun ethan-wspace-type-eol-find ()
-  (save-excursion
-    (goto-char (point-min))
-    (let ((pos (re-search-forward ethan-wspace-type-eol-regexp nil t)))
-      (when pos (cons (match-beginning 0) (match-end 0))))))
+;; show-trailing-whitespace uses the face `trailing-whitespace', so we
+;; make this mirror `ethan-wspace-face'.
+(copy-face 'ethan-wspace-face 'trailing-whitespace)
 
-;; (defvar ethan-wspace-type-trailing-newline-regexp "\n\n+$")
+
+;;; End-of-file newlines: symbol `trailing-newline'
+(defun ethan-wspace-count-trailing-nls ()
+  (save-excursion
+    (goto-char (point-max))
+    (skip-chars-backward "\n")
+    (- (point-max) (point))))
+
+(defun ethan-wspace-type-trailing-nls-find ()
+  (let* ((trailing-newlines (ethan-wspace-count-trailing-nls))
+         (max (point-max)))
+    (if (= trailing-newlines 1)
+        nil
+      (if (= trailing-newlines 0)
+          (cons max max)
+        (cons (- max (1- trailing-newlines)) max)))))
+
+;;; This is a failed attempt at using a font-lock keyword to look for
+;;; trailing newlines.  It doesn't work because there's no regexp that
+;;; matches EOF. I'm keeping it here in case I want to use the
+;;; define-ethan-wspace-highlight-mode macro.
 
 ;; (defvar ethan-wspace-type-trailing-newline-keyword
 ;;   (list ethan-wspace-type-trailing-newline-regexp 0 (list 'quote 'ethan-wspace-face) t)
@@ -328,7 +369,13 @@ This internally uses `show-trailing-whitespace'."
 ;;   :font-lock-keyword ethan-wspace-type-trailing-newline-keyword)
 
 
-
+;; Implemented using overlays to mark a fake "eof" string, or
+;; highlight newlines at end of file.  I couldn't figure out a way to
+;; make the eof have a trailing newline AND keep the cursor on the
+;; first character -- putting a \n in the overlay seems to force the
+;; cursor to the newline afterwards -- so I just extend the overlay to
+;; edge-of-frame manually. This kind of sucks but it'll hopefully do
+;; for now.
 (define-minor-mode ethan-wspace-highlight-trailing-nls-mode
   "Minor mode to highlight trailing newlines if absent or if more than 1.
 
@@ -355,8 +402,10 @@ With arg, turn highlighting on if arg is positive, off otherwise."
   (overlay-put ethan-wspace-highlight-trailing-nls-overlay 'face nil))
 
 (defun ethan-wspace-highlight-trailing-nls-update-overlay-missing ()
+  "Update the overlay to show that there is no trailing newline at end of file."
   (ethan-wspace-highlight-trailing-nls-update-overlay-off)
   (save-excursion
+    (move-overlay ethan-wspace-highlight-trailing-nls-overlay (point-max) (point-max))
     (goto-char (point-max))
     (let* ((str-len (- (frame-width) (current-column)))
            (str (concat "eof" (make-string (- str-len 3) ?\ ))))
@@ -365,6 +414,7 @@ With arg, turn highlighting on if arg is positive, off otherwise."
       (overlay-put ethan-wspace-highlight-trailing-nls-overlay 'after-string str))))
 
 (defun ethan-wspace-highlight-trailing-nls-update-overlay-too-many ()
+  "Update the overlay to highlight the newlines at EOF."
   (ethan-wspace-highlight-trailing-nls-update-overlay-off)
   (save-excursion
     (goto-char (point-max))             ; end of file
@@ -373,19 +423,15 @@ With arg, turn highlighting on if arg is positive, off otherwise."
     (move-overlay ethan-wspace-highlight-trailing-nls-overlay (point) (point-max))
     (overlay-put ethan-wspace-highlight-trailing-nls-overlay 'face 'ethan-wspace-face)))
 
-(defun ethan-wspace-count-trailing-nls ()
-  (save-excursion
-    (goto-char (point-max))
-    (skip-chars-backward "\n")
-    (- (point-max) (point))))
-
 (defun ethan-wspace-highlight-trailing-nls-pre-command-hook ()
-  ;; For some reason vline uses this to turn off the overlay. No idea why.
+  ;; For some reason vline uses this to turn off the overlay.
+  ;; Probably for ease of creating new overlays without having to
+  ;; delete old ones?  No idea, but I'm just copying what they do,
+  ;; so..
   ())
 
 (defun ethan-wspace-highlight-trailing-nls-post-command-hook ()
   (let ((trailing-nls (ethan-wspace-count-trailing-nls)))
-    (message "Processing. %s trailing nls." trailing-nls)
     (cond
      ((= trailing-nls 0)
       (ethan-wspace-highlight-trailing-nls-update-overlay-missing))
@@ -393,7 +439,8 @@ With arg, turn highlighting on if arg is positive, off otherwise."
       (ethan-wspace-highlight-trailing-nls-update-overlay-too-many))
      (t
       (ethan-wspace-highlight-trailing-nls-update-overlay-off)))))
-
+
+;;; ethan-wspace-mode: doing stuff for all types.
 (define-minor-mode ethan-wspace-mode
   "Minor mode for coping with whitespace.
 
@@ -475,7 +522,4 @@ This just activates each whitespace type in this buffer."
 ;(set-face-background 'show-ws-trailing-whitespace space-color)
 ;(set-face-background 'trailing-whitespace space-color)
 
-;; show-trailing-whitespace uses the face `trailing-whitespace', so we
-;; make this mirror `ethan-wspace-face'.
-(copy-face 'ethan-wspace-face 'trailing-whitespace)
 (provide 'ethan-wspace)
