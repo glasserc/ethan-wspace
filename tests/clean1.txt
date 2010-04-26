@@ -1,4 +1,3 @@
 This file is clean;
 no tabs, no trailing whitespace,
 exactly one trailing newline.
-
