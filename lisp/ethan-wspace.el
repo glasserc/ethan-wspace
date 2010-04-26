@@ -362,7 +362,8 @@ This internally uses `show-trailing-whitespace'."
 (defun ethan-wspace-type-no-nl-eof-find ()
   (let* ((trailing-newlines (ethan-wspace-count-trailing-nls))
          (max (point-max)))
-    (if (= trailing-newlines 0)
+    (if (and (= trailing-newlines 0)
+             (not (= (buffer-size) 0)))  ; don't count empty files as dirty
         (cons max max)
       nil)))
 
@@ -372,7 +373,8 @@ This internally uses `show-trailing-whitespace'."
     (save-excursion
       (goto-char (point-max))
       (skip-chars-backward "\n")
-      (if (not (looking-at "\n"))
+      (if (and (not (looking-at "\n"))
+               (not (= (buffer-size) 0)))   ; don't need to clean empty files
           (insert "\n")))))
 
 
