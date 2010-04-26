@@ -519,6 +519,9 @@ With arg, turn highlighting on if arg is positive, off otherwise."
   "The list of errors that a user wants recognized."
   :group 'ethan-wspace)
 
+;; Let this get changed per-buffer
+(make-variable-buffer-local 'ethan-wspace-errors)
+
 (defun ethan-wspace-alpha-blend (bg fg alpha)
   (let ((newcolor nil))
     (dolist (i '(2 1 0))
@@ -560,6 +563,13 @@ With arg, turn highlighting on if arg is positive, off otherwise."
   (when ethan-wspace-highlight-trailing-nls-many-mode
     (ethan-wspace-highlight-trailing-nls-many-overlay-update)))
 
+(defvar ethan-wspace-errors-in-buffer-hook nil
+  "Hook run by `ethan-wspace-mode' to allow customizing the errors to look for.
+
+A useful hook might be:
+
+  (lambda () (setq ethan-wspace-errors (remove 'tabs ethan-wspace-errors)))")
+
 (define-minor-mode ethan-wspace-mode
   "Minor mode for coping with whitespace.
 
@@ -568,6 +578,7 @@ This just activates each whitespace type in this buffer."
   ;(message "Turning on ethan-wspace mode for %s" (buffer-file-name))
   (if ethan-wspace-mode
       (progn
+        (run-hooks 'ethan-wspace-errors-in-buffer-hook)
         (ethan-wspace-update-buffer)
         (add-hook 'pre-command-hook 'ethan-wspace-pre-command-hook nil t)
         (add-hook 'post-command-hook 'ethan-wspace-post-command-hook nil t))
