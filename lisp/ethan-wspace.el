@@ -352,21 +352,21 @@ This internally uses `show-trailing-whitespace'."
                            :highlight ethan-wspace-highlight-eol-mode)
 
 
-;;; "No newline at end of file": symbol `trailing-nls-missing'
+;;; "No newline at end of file": symbol `no-nl-eof'
 (defun ethan-wspace-count-trailing-nls ()
   (save-excursion
     (goto-char (point-max))
     (skip-chars-backward "\n")
     (- (point-max) (point))))
 
-(defun ethan-wspace-type-trailing-nls-missing-find ()
+(defun ethan-wspace-type-no-nl-eof-find ()
   (let* ((trailing-newlines (ethan-wspace-count-trailing-nls))
          (max (point-max)))
     (if (= trailing-newlines 0)
         (cons max max)
       nil)))
 
-(defun ethan-wspace-type-trailing-nls-missing-clean (begin end)
+(defun ethan-wspace-type-no-nl-eof-clean (begin end)
   ;; FIXME: could respect begin, end
   (save-match-data
     (save-excursion
@@ -412,44 +412,44 @@ This internally uses `show-trailing-whitespace'."
 ;; cursor to the newline afterwards -- so I just extend the overlay to
 ;; edge-of-frame manually. This kind of sucks but it'll hopefully do
 ;; for now.
-(defvar ethan-wspace-highlight-trailing-nls-missing-overlay nil
+(defvar ethan-wspace-highlight-no-nl-eof-overlay nil
   "An overlay used to indicate that trailing newlines are missing.")
 
-(make-variable-buffer-local 'ethan-wspace-highlight-trailing-nls-missing-overlay)
+(make-variable-buffer-local 'ethan-wspace-highlight-no-nl-eof-overlay)
 
-(defun ethan-wspace-highlight-trailing-nls-missing-make-overlay ()
-  (setq ethan-wspace-highlight-trailing-nls-missing-overlay
-        (or ethan-wspace-highlight-trailing-nls-missing-overlay (make-overlay 0 0))))
+(defun ethan-wspace-highlight-no-nl-eof-make-overlay ()
+  (setq ethan-wspace-highlight-no-nl-eof-overlay
+        (or ethan-wspace-highlight-no-nl-eof-overlay (make-overlay 0 0))))
 
-(defun ethan-wspace-highlight-trailing-nls-missing-overlay-off ()
-  (and ethan-wspace-highlight-trailing-nls-missing-overlay
-       (overlay-put ethan-wspace-highlight-trailing-nls-missing-overlay 'after-string nil)))
+(defun ethan-wspace-highlight-no-nl-eof-overlay-off ()
+  (and ethan-wspace-highlight-no-nl-eof-overlay
+       (overlay-put ethan-wspace-highlight-no-nl-eof-overlay 'after-string nil)))
 
-(define-minor-mode ethan-wspace-highlight-trailing-nls-missing-mode
+(define-minor-mode ethan-wspace-highlight-no-nl-eof-mode
   "Minor mode to highlight trailing newlines if absent or if more than 1.
 
 With arg, turn highlighting on if arg is positive, off otherwise."
   :init-value nil :lighter nil :keymap nil
-  (if ethan-wspace-highlight-trailing-nls-missing-mode
-      (ethan-wspace-highlight-trailing-nls-missing-make-overlay)
-    (ethan-wspace-highlight-trailing-nls-missing-overlay-off)))
+  (if ethan-wspace-highlight-no-nl-eof-mode
+      (ethan-wspace-highlight-no-nl-eof-make-overlay)
+    (ethan-wspace-highlight-no-nl-eof-overlay-off)))
 
-(defun ethan-wspace-highlight-trailing-nls-missing-overlay-update ()
+(defun ethan-wspace-highlight-no-nl-eof-overlay-update ()
   "Update the overlay to show that there is no trailing newline at end of file."
-  (ethan-wspace-highlight-trailing-nls-missing-overlay-off)
+  (ethan-wspace-highlight-no-nl-eof-overlay-off)
   (when (= (ethan-wspace-count-trailing-nls) 0)
     (save-excursion
-      (move-overlay ethan-wspace-highlight-trailing-nls-missing-overlay (point-max) (point-max))
+      (move-overlay ethan-wspace-highlight-no-nl-eof-overlay (point-max) (point-max))
       (goto-char (point-max))
       (let* ((str-len (- (frame-width) (current-column)))
              (str (concat "eof" (make-string (- str-len 3) ?\ ))))
         (set-text-properties 0 str-len '(face ethan-wspace-face) str)
         (set-text-properties 0 1 '(cursor t face ethan-wspace-face) str)
-        (overlay-put ethan-wspace-highlight-trailing-nls-missing-overlay 'after-string str)))))
+        (overlay-put ethan-wspace-highlight-no-nl-eof-overlay 'after-string str)))))
 
-(ethan-wspace-declare-type trailing-nls-missing :find ethan-wspace-type-trailing-nls-missing-find
-                           :clean ethan-wspace-type-trailing-nls-missing-clean
-                           :highlight ethan-wspace-highlight-trailing-nls-missing-mode
+(ethan-wspace-declare-type no-nl-eof :find ethan-wspace-type-no-nl-eof-find
+                           :clean ethan-wspace-type-no-nl-eof-clean
+                           :highlight ethan-wspace-highlight-no-nl-eof-mode
                            :description "trailing newlines")
 
 
@@ -558,8 +558,8 @@ With arg, turn highlighting on if arg is positive, off otherwise."
 
 (defun ethan-wspace-post-command-hook ()
   ;; FIXME: needs to update in each buffer!
-  (when ethan-wspace-highlight-trailing-nls-missing-mode
-    (ethan-wspace-highlight-trailing-nls-missing-overlay-update))
+  (when ethan-wspace-highlight-no-nl-eof-mode
+    (ethan-wspace-highlight-no-nl-eof-overlay-update))
   (when ethan-wspace-highlight-trailing-nls-many-mode
     (ethan-wspace-highlight-trailing-nls-many-overlay-update)))
 
@@ -594,6 +594,7 @@ This just activates each whitespace type in this buffer."
       (ethan-wspace-type-activate type))))
 
 (defun ethan-wspace-clean-all-modes ()
+  "*Turn on clean mode for all whitespace modes."
   (interactive)
   (dolist (type ethan-wspace-errors)
     (ethan-wspace-type-activate-clean type)))
