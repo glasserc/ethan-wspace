@@ -63,17 +63,19 @@ ethan-wspace takes the approach of *do no harm*. Specifically, when you open a f
   doesn't prevent you from introducing new errors, but hopefully you
   will be cognizant of the errors in the file.
 
-ethan-wspace considers three things errors so far:
+ethan-wspace recognizes the following categories of whitespace errors:
 
 1. trailing whitespace.
 
-2. no trailing newline, or more than one trailing newline.
+2. no trailing newline.
 
-3. tabs (at all).
+3. more than one trailing newline.
+
+4. tabs (at all).
 
 It recognizes these categories independently, and treats each category
 as clean or not-clean. The goal is always to make your diffs
-unambiguous. Laudable goal, right? [N.B. independence not yet implemented.]
+unambiguous. Laudable goal, right?
 
 My tabs! Get your hands off my tabs!
 ====================================
@@ -81,7 +83,116 @@ My tabs! Get your hands off my tabs!
 It is my opinion (and remember, my opinions are right) that you should
 never, ever have tabs in your source code, at all. This was once a
 holy war, but in my experience, pretty much everybody today
-understands this point and the reasoning behind it.
+understands this point and the reasoning behind it. If you disagree,
+please see `Tabs Are Evil
+<http://www.emacswiki.org/emacs/TabsAreEvil>`_ on the EmacsWiki.
+
+Perhaps you are one of those bizarre creatures who uses `Smart Tabs
+<http://www.emacswiki.org/emacs/SmartTabs>`_. In that case, you are
+even more OCD about whitespace than I am, and in a twisted way I
+salute you. However, ``ethan-wspace`` by default treats tabs as
+errors, which you might find distracting. In that case, I recommend
+something like the following::
+
+    (set-default 'ethan-wspace-errors (remove 'tabs ethan-wspace-errors))
+
+How to use it
+=============
+
+For a full emacs config that uses ethan-wspace, please see
+http://github.com/glasserc/etc. I'd suggest you start keeping your
+dot-rc files in source control too. If you're using git, you can make
+a submodule that points to this repository, and in this way keep on
+top of changes.
+
+The essential aspects here are to add the ``lisp`` directory to your
+``load-path``, and then ``(require 'ethan-wspace)``. In other words,
+add to your ``init.el`` something like the following::
+
+    (add-to-list 'load-path (expand-file-name "~/.emacs.d/upstream/ethan-wspace.git/lisp"))
+    (require 'ethan-wspace)
+    (global-ethan-wspace-mode 1)
+
+(I keep all my git-based upstreams in a ``contrib`` directory, and
+symlink the directories with lisp source code into
+``~/.emacs.d/packages``, but your mileage may vary.)
+
+You should also remove any customizations you have made to turn on
+either ``show-trailing-whitespace`` or ``require-final-newline``; we
+handle those for you.
+
+When you open files, bad whitespace will be highlit and clean
+whitespace will be maintained. You can switch from one to the other
+using ``M-x ethan-wspace-highlight-FOO-mode`` or ``M-x
+ethan-wspace-clean-FOO-mode`` (each mode disables the other).  If you
+want to begin cleaning all whitespace, you can use ``M-x
+ethan-wspace-clean-all-modes``.
+
+ You might also want to customize the face used to highlight erroneous
+whitespace. This is configurable by ``ethan-wspace-face``. A default
+face is computed based on the background of your frame when
+``ethan-wspace`` was ``require``\ d (so you might want to make your
+calls to ``color-theme`` first).
+
+Relationship to other emacs things
+==================================
+
+Most other emacs whitespace customizations (and there are many: see
+`ShowWhiteSpace on the EmacsWiki
+<http://www.emacswiki.org/emacs/ShowWhiteSpace>`_) focus on showing
+problematic whitespace. There are also some customizations out there
+focused on `Deleting Whitespace
+<http://www.emacswiki.org/emacs/DeletingWhitespace>`_. But there are
+many and they all have extremely similar names. (``ethan-wspace`` aims
+to be the most egotistically-named package.)
+
+* Putting ``delete-trailing-whitespace`` or
+  ``nuke-trailing-whitespace`` in your ``before-save-hook`` is now
+  obsolete; these functions are too aggressive and will cause you many
+  spurious whitespace commits.
+
+* Standard emacs variables ``show-trailing-whitespace`` and
+  ``require-final-newline`` are "subsumed" by this mode --
+  ``require-final-newline`` is reimplemented in a more general way,
+  and ``show-trailing-whitespace`` is triggered per-buffer by this
+  mode. (``show-trailing-whitespace`` is built into emacs core and
+  seems to be the fastest/most elegant way to highlight trailing whitespace.)
+
+* ``next-line-add-newlines``, to add newlines when you move forward
+  lines, still exists and is unchanged. I recommend you set this to
+  nil (if it isn't already -- I think it is nil in all versions since
+  21.1), but ``ethan-wspace`` will still trim unnecessary newlines on each
+  save if there were fewer than two when the buffer was opened.
+
+* `whitespace.el <http://www.emacswiki.org/emacs/WhiteSpace>`_ and the
+  family of related code that includes ``visws.el``,
+  ``whitespace-mode.el``, ``show-whitespace-mode.el``, and
+  ``blank-mode.el`` has many options for making whitespace characters
+  visible, both by faces and by changing their representations in the
+  display table. That seems very useful for editing binary files or
+  other circumstances where you care exactly what whitespace you're
+  looking at, but it isn't really useful for editing source code,
+  where you typically want whitespace to be as clean as possible. I
+  have no idea which of those files is most recent or "best", as I
+  have never used them.
+
+* `redspace.el <http://www.emacswiki.org/emacs/redspace.el>`_ is a
+  small library meant only to highlight trailing whitespace. This is
+  already done by the variable ``show-trailing-whitespace``, which is
+  used internally by ``ethan-wspace``. ``show-trailing-whitespace``
+  has the nice effect that it doesn't highlight trailing whitespace
+  when your cursor is after it -- so you don't see little blinking
+  lights as you type a line of text.
+
+* `ws-trim.el <ftp://ftp.lysator.liu.se/pub/emacs/ws-trim.el>`_
+  automatically trims whitespace on edited lines. With a low
+  ``ws-trim-level`` it is complementary to ``ethan-wspace``, and may
+  be useful to encourage you to delete whitespace organically. I'd
+  never heard about this package and hopefully ``ethan-wspace`` will
+  grow similar functionality soon.
+
+More ranting about Tabs Are Evil
+================================
 
 Required reading for this discussion is JWZ's "famous" `tabs versus
 spaces <http://www.jwz.org/gruntle/tabs-versus-spaces.html>`_ post. He
@@ -140,30 +251,3 @@ all agreed on the tabs-for-scope-plus-spaces-for-alignment rule, I'd
 investigate configuring emacs to do this. But until then I rely on the
 far easier expedient of just outlawing tabs in source code entirely
 and consigning them to the dustbin of history.)
-
-How to use it
-=============
-
-For a full emacs config that uses ethan-wspace, please see
-http://github.com/glasserc/etc. I'd suggest you start keeping your
-dot-rc files in source control too. If you're using git, you can make
-a submodule that points to this repository, and in this way keep on
-top of changes.
-
-The essential aspects here are to add the ``lisp`` directory to your
-``load-path``, and then ``(require 'ethan-wspace)``. In other words,
-add to your ``init.el`` something like the following::
-
-    (add-to-list 'load-path (expand-file-name "~/.emacs.d/upstream/ethan-wspace.git/lisp"))
-    (require 'ethan-wspace)
-
-(I keep all my git-based upstreams in a ``contrib`` directory, and
-symlink the directories with lisp source code into
-``~/.emacs.d/packages``, but your mileage may vary.)
-
-[FIXME: not yet implemented.]  You might also want to customize the
-face used to highlight erroneous whitespace. This is configurable by
-``ethan-wspace-color``. If you're using color-theme, a default will be
-calculated based on that.
-
-
