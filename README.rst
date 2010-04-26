@@ -65,13 +65,13 @@ ethan-wspace takes the approach of *do no harm*. Specifically, when you open a f
 
 ethan-wspace recognizes the following categories of whitespace errors:
 
-1. trailing whitespace.
+1. trailing whitespace at end of line (``eol``).
 
-2. no trailing newline.
+2. no trailing newline (``no-nl-eof``).
 
-3. more than one trailing newline.
+3. more than one trailing newline (``many-nls-eof``).
 
-4. tabs (at all).
+4. tabs, at all (``tabs``).
 
 It recognizes these categories independently, and treats each category
 as clean or not-clean. The goal is always to make your diffs
@@ -144,7 +144,26 @@ problematic whitespace. There are also some customizations out there
 focused on `Deleting Whitespace
 <http://www.emacswiki.org/emacs/DeletingWhitespace>`_. But there are
 many and they all have extremely similar names. (``ethan-wspace`` aims
-to be the most egotistically-named package.)
+to be the most egotistically-named package.) ``ethan-wspace`` subsumes most of them, except for ``whitespace.el`` to show all whitespace in non-programming contexts, and ``ws-trim.el`` which I had never heard of before just now.
+
+* `whitespace.el <http://www.emacswiki.org/emacs/WhiteSpace>`_ and the
+  family of related code that includes ``visws.el``,
+  ``whitespace-mode.el``, ``show-whitespace-mode.el``, and
+  ``blank-mode.el`` has many options for making whitespace characters
+  visible, both by faces and by changing their representations in the
+  display table. That seems very useful for editing binary files or
+  other circumstances where you care exactly what whitespace you're
+  looking at, but it isn't really useful for editing source code,
+  where you typically want whitespace to be as clean as possible. I
+  have no idea which of those files is most recent or "best", as I
+  have never used them.
+
+* `ws-trim.el <ftp://ftp.lysator.liu.se/pub/emacs/ws-trim.el>`_
+  automatically trims whitespace on edited lines. With a low
+  ``ws-trim-level`` it is complementary to ``ethan-wspace``, and may
+  be useful to encourage you to delete whitespace organically. I'd
+  never heard about this package and hopefully ``ethan-wspace`` will
+  grow similar functionality soon.
 
 * Putting ``delete-trailing-whitespace`` or
   ``nuke-trailing-whitespace`` in your ``before-save-hook`` is now
@@ -164,18 +183,6 @@ to be the most egotistically-named package.)
   21.1), but ``ethan-wspace`` will still trim unnecessary newlines on each
   save if there were fewer than two when the buffer was opened.
 
-* `whitespace.el <http://www.emacswiki.org/emacs/WhiteSpace>`_ and the
-  family of related code that includes ``visws.el``,
-  ``whitespace-mode.el``, ``show-whitespace-mode.el``, and
-  ``blank-mode.el`` has many options for making whitespace characters
-  visible, both by faces and by changing their representations in the
-  display table. That seems very useful for editing binary files or
-  other circumstances where you care exactly what whitespace you're
-  looking at, but it isn't really useful for editing source code,
-  where you typically want whitespace to be as clean as possible. I
-  have no idea which of those files is most recent or "best", as I
-  have never used them.
-
 * `redspace.el <http://www.emacswiki.org/emacs/redspace.el>`_ is a
   small library meant only to highlight trailing whitespace. This is
   already done by the variable ``show-trailing-whitespace``, which is
@@ -184,12 +191,9 @@ to be the most egotistically-named package.)
   when your cursor is after it -- so you don't see little blinking
   lights as you type a line of text.
 
-* `ws-trim.el <ftp://ftp.lysator.liu.se/pub/emacs/ws-trim.el>`_
-  automatically trims whitespace on edited lines. With a low
-  ``ws-trim-level`` it is complementary to ``ethan-wspace``, and may
-  be useful to encourage you to delete whitespace organically. I'd
-  never heard about this package and hopefully ``ethan-wspace`` will
-  grow similar functionality soon.
+* `show-wspace.el <http://www.emacswiki.org/emacs/show-wspace.el>`_ is
+  a library that has lots of faces to show tabs, trailing whitespace,
+  and "hard spaces". ``ethan-wspace`` obsoletes this mode too.
 
 More ranting about Tabs Are Evil
 ================================
