@@ -200,18 +200,31 @@ type."
      (ethan-wspace-type-activate-highlight type-name)
     (ethan-wspace-type-activate-clean type-name)))
 
-(defun ethan-wspace-type-activate-clean (type-name)
+(defun ethan-wspace-type-deactivate (type-name)
+  "Turn \"off\" the whitespace type given by `type-name'.
+
+This turns off both highlighting and cleaning for this type. You're on your own."
+  (ethan-wspace-type-activate-highlight type-name -1)
+  (ethan-wspace-type-activate-clean type-name -1))
+
+(defun ethan-wspace-type-activate-clean (type-name &optional value)
+  "Used to activate and deactivate clean-modes for a type.
+
+Set `value' to -1 to deactivate a clean-mode."
   (let ((clean-mode (ethan-wspace-type-clean-mode-symbol type-name)))
-    (apply clean-mode '(1))))
+    (apply clean-mode (list (or value 1)))))
 
 (defun ethan-wspace-type-clean-mode-active (type-name)
   (let ((clean-mode (ethan-wspace-type-clean-mode-symbol type-name)))
     (eval clean-mode)))
 
-(defun ethan-wspace-type-activate-highlight (type-name)
+(defun ethan-wspace-type-activate-highlight (type-name &optional value)
+  "Used to activate and deactivate highlight-modes for a type.
+
+Set `value' to -1 to deactivate a highlight-mode."
   (let* ((type (ethan-wspace-get-type type-name))
          (highlight-mode (ethan-wspace-type-get-field type :highlight)))
-    (apply highlight-mode '(1))))
+    (apply highlight-mode (list (or value 1)))))
 
 
 ;;; TABS
