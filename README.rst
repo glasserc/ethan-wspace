@@ -43,7 +43,7 @@ thing: diffs like these.
 
 What's going on in this diff? Take a few minutes to study it and figure out what's going on. What did I change? It doesn't look like I changed anything! But in fact there's a diff, so there must be some change, right?
 
-The answer is that I either introduced or removed whitespace at the end of the line. ``git diff`` will highlight, in red, trailing whitespace like this that you added, but not that you took away.
+The answer is that I either introduced or removed whitespace at the end of the line. ``git diff`` will highlight, in red, trailing whitespace like this that you added, but not that you took away. (P.S. ReStructuredText is removing the trailing whitespace from the example, but if you look at the rst source you will see that it is there.)
 
 Reviewing diffs with whitespace changes is annoying. Trying to guess what the whitespace changes were, so you can undo the whitespace changes, is downright tedious. Ideally you should never have to do these things.
 
@@ -128,7 +128,7 @@ ethan-wspace-clean-FOO-mode`` (each mode disables the other).  If you
 want to begin cleaning all whitespace, you can use ``M-x
 ethan-wspace-clean-all-modes``.
 
- You might also want to customize the face used to highlight erroneous
+You might also want to customize the face used to highlight erroneous
 whitespace. This is configurable by ``ethan-wspace-face``. A default
 face is computed based on the background of your frame when
 ``ethan-wspace`` was ``require``\ d (so you might want to make your
