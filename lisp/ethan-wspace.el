@@ -616,33 +616,6 @@ This just activates each whitespace type in this buffer."
 
 (add-hook 'before-save-hook 'ethan-wspace-clean-before-save-hook)
 
-;;; Showing whitespace
-;;
-;; We want to show whitespace if it's a real file and the original ws
-;; was broken. If it was clean originally, we assume it'll be correct
-;; (we'll clean it every save anyhow).
-;;
-;; We also turn it off for real files with dont-show-ws-this-buffer set to t.
-;; Thus for .patch or .diff files, we can use special diff-mode magic.
-(defvar dont-show-ws-this-buffer nil)
-(make-variable-buffer-local 'dont-show-ws-this-buffer)
-
-;; (require 'show-wspace)
-;; (add-hook 'font-lock-mode-hook
-;;           (lambda ()
-;;             (if (and (buffer-file-name)
-;;                      (not dont-show-ws-this-buffer)
-;;                      (not (buffer-whitespace-clean-p)))
-;;                 (progn
-;;                   (show-ws-highlight-tabs)
-;;                   (setq show-trailing-whitespace t)))))
-
-(defun dont-show-ws ()
-;  (setq show-trailing-whitespace nil)  ; I have this variable customized
-  (setq dont-show-ws-this-buffer t))
-
-(add-hook 'diff-mode-hook 'dont-show-ws)
-
 ;; Diff mode.
 ;;
 ;; Every line in a diff starts with a plus, a minus, or a space -- so
@@ -657,10 +630,10 @@ This just activates each whitespace type in this buffer."
 ; changes text color on lines that match.
 ;
 ; FIXME: "bzr diff" format contains tabs?
-(add-hook 'diff-mode-hook
-          (lambda ()
-            (font-lock-add-keywords nil
-                                    '(("\\S-\\([\240\040\t]+\\)$"
-                                       (1 'show-ws-trailing-whitespace t))))))
+;; (add-hook 'diff-mode-hook
+;;           (lambda ()
+;;             (font-lock-add-keywords nil
+;;                                     '(("\\S-\\([\240\040\t]+\\)$"
+;;                                        (1 'show-ws-trailing-whitespace t))))))
 
 (provide 'ethan-wspace)
