@@ -61,6 +61,8 @@
 ;; Currently each whitespace type is represented as an association list
 ;; with keys :check, :clean, and :highlight, and values symbols of functions
 ;; or whatever.
+(require 'assoc)
+
 (defvar ethan-wspace-types nil
   "The list of all known whitespace types.")
 
@@ -530,15 +532,15 @@ With arg, turn highlighting on if arg is positive, off otherwise."
         (setq newcolor (cons newi newcolor))))
     newcolor))
 
-(defun ethan-wspace-appropriate-color (&optional frame)
+(defun ethan-wspace-appropriate-face (&optional frame)
   (let* ((bg (aget (frame-parameters frame) 'background-color))
          (rgb (color-values bg))
          (new-color (ethan-wspace-alpha-blend rgb '(65535 0 0) 0.2))
-         (hex (apply format "#%04x%04x%04x" new-color)))
+         (hex (apply 'format "#%04x%04x%04x" new-color)))
     (list :background hex)))
 
 (defface ethan-wspace-face
-  '((t (ethan-wspace-appropriate-face)))
+  `((t ,(ethan-wspace-appropriate-face)))
   "FIXME: compute this from color-theme or something"
   :group 'ethan-wspace)
 
