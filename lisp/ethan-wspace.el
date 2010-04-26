@@ -51,8 +51,6 @@
 ;;
 ;; FIXME: Coding conventions suggest using (define-* thing-name) for generated stuff.
 ;;
-;; FIXME: function to clean-ws the whole file and activate all clean-modes?
-;;
 ;; FIXME: fancy lighter
 ;;
 ;; FIXME: buffer-local-ize ethan-wspace-errors
@@ -453,15 +451,15 @@ With arg, turn highlighting on if arg is positive, off otherwise."
                            :description "trailing newlines")
 
 
-;;; More than one newline at end of file: symbol `trailing-nls-many'
-(defun ethan-wspace-type-trailing-nls-many-find ()
+;;; More than one newline at end of file: symbol `many-nls-eof'
+(defun ethan-wspace-type-many-nls-eof-find ()
   (let* ((trailing-newlines (ethan-wspace-count-trailing-nls))
          (max (point-max)))
     (if (> trailing-newlines 1)
         (cons (- max (1- trailing-newlines)) max)
       nil)))
 
-(defun ethan-wspace-type-trailing-nls-many-clean (begin end)
+(defun ethan-wspace-type-many-nls-eof-clean (begin end)
   (save-match-data
     (save-excursion
       (goto-char (point-max))
@@ -470,42 +468,42 @@ With arg, turn highlighting on if arg is positive, off otherwise."
         (forward-char)                         ; skip a newline
         (delete-region (point) (point-max)))))) ; delete others
 
-(defvar ethan-wspace-highlight-trailing-nls-many-overlay nil
+(defvar ethan-wspace-highlight-many-nls-eof-overlay nil
   "The overlay to use when highlighting too-many-newlines.")
 
-(make-variable-buffer-local 'ethan-wspace-highlight-trailing-nls-many-overlay)
+(make-variable-buffer-local 'ethan-wspace-highlight-many-nls-eof-overlay)
 
-(defun ethan-wspace-highlight-trailing-nls-many-make-overlay ()
-  (setq ethan-wspace-highlight-trailing-nls-many-overlay
-        (or ethan-wspace-highlight-trailing-nls-many-overlay (make-overlay 0 0))))
+(defun ethan-wspace-highlight-many-nls-eof-make-overlay ()
+  (setq ethan-wspace-highlight-many-nls-eof-overlay
+        (or ethan-wspace-highlight-many-nls-eof-overlay (make-overlay 0 0))))
 
-(defun ethan-wspace-highlight-trailing-nls-many-overlay-off ()
-  (and ethan-wspace-highlight-trailing-nls-many-overlay
-       (overlay-put ethan-wspace-highlight-trailing-nls-many-overlay 'face nil)))
+(defun ethan-wspace-highlight-many-nls-eof-overlay-off ()
+  (and ethan-wspace-highlight-many-nls-eof-overlay
+       (overlay-put ethan-wspace-highlight-many-nls-eof-overlay 'face nil)))
 
-(define-minor-mode ethan-wspace-highlight-trailing-nls-many-mode
+(define-minor-mode ethan-wspace-highlight-many-nls-eof-mode
   "Minor mode to highlight trailing newlines if absent or if more than 1.
 
 With arg, turn highlighting on if arg is positive, off otherwise."
   :init-value nil :lighter nil :keymap nil
-  (if ethan-wspace-highlight-trailing-nls-many-mode
-      (ethan-wspace-highlight-trailing-nls-many-make-overlay)
-    (ethan-wspace-highlight-trailing-nls-many-overlay-off)))
+  (if ethan-wspace-highlight-many-nls-eof-mode
+      (ethan-wspace-highlight-many-nls-eof-make-overlay)
+    (ethan-wspace-highlight-many-nls-eof-overlay-off)))
 
-(defun ethan-wspace-highlight-trailing-nls-many-overlay-update ()
+(defun ethan-wspace-highlight-many-nls-eof-overlay-update ()
   "Update the overlay to highlight the newlines at EOF."
-  (ethan-wspace-highlight-trailing-nls-many-overlay-off)
+  (ethan-wspace-highlight-many-nls-eof-overlay-off)
   (when (< 1 (ethan-wspace-count-trailing-nls))
     (save-excursion
       (goto-char (point-max))             ; end of file
       (skip-chars-backward "\n")          ; backwards through all of them
       (forward-char 1)                      ; leave one, which is the correct amount
-      (move-overlay ethan-wspace-highlight-trailing-nls-many-overlay (point) (point-max))
-      (overlay-put ethan-wspace-highlight-trailing-nls-many-overlay 'face 'ethan-wspace-face))))
+      (move-overlay ethan-wspace-highlight-many-nls-eof-overlay (point) (point-max))
+      (overlay-put ethan-wspace-highlight-many-nls-eof-overlay 'face 'ethan-wspace-face))))
 
-(ethan-wspace-declare-type trailing-nls-many :find ethan-wspace-type-trailing-nls-many-find
-                           :clean ethan-wspace-type-trailing-nls-many-clean
-                           :highlight ethan-wspace-highlight-trailing-nls-many-mode
+(ethan-wspace-declare-type many-nls-eof :find ethan-wspace-type-many-nls-eof-find
+                           :clean ethan-wspace-type-many-nls-eof-clean
+                           :highlight ethan-wspace-highlight-many-nls-eof-mode
                            :description "trailing newlines")
 
 
@@ -560,8 +558,8 @@ With arg, turn highlighting on if arg is positive, off otherwise."
   ;; FIXME: needs to update in each buffer!
   (when ethan-wspace-highlight-no-nl-eof-mode
     (ethan-wspace-highlight-no-nl-eof-overlay-update))
-  (when ethan-wspace-highlight-trailing-nls-many-mode
-    (ethan-wspace-highlight-trailing-nls-many-overlay-update)))
+  (when ethan-wspace-highlight-many-nls-eof-mode
+    (ethan-wspace-highlight-many-nls-eof-overlay-update)))
 
 (defvar ethan-wspace-errors-in-buffer-hook nil
   "Hook run by `ethan-wspace-mode' to allow customizing the errors to look for.
