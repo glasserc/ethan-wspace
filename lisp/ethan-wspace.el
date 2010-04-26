@@ -506,8 +506,25 @@ With arg, turn highlighting on if arg is positive, off otherwise."
   "The list of errors that a user wants recognized."
   :group 'ethan-wspace)
 
+(defun ethan-wspace-alpha-blend (bg fg alpha)
+  (let ((newcolor nil))
+    (dolist (i '(2 1 0))
+      (let* ((bgi (nth i bg))
+             (fgi (nth i fg))
+             (newi (+ (* fgi alpha)
+                      (* bgi (- 1 alpha)))))
+        (setq newcolor (cons newi newcolor))))
+    newcolor))
+
+(defun ethan-wspace-appropriate-color (&optional frame)
+  (let* ((bg (aget (frame-parameters frame) 'background-color))
+         (rgb (color-values bg))
+         (new-color (ethan-wspace-alpha-blend rgb '(65535 0 0) 0.2))
+         (hex (apply format "#%04x%04x%04x" new-color)))
+    (list :background hex)))
+
 (defface ethan-wspace-face
-  '((t (:background "red")))
+  '((t (ethan-wspace-appropriate-face)))
   "FIXME: compute this from color-theme or something"
   :group 'ethan-wspace)
 
@@ -612,13 +629,5 @@ This just activates each whitespace type in this buffer."
             (font-lock-add-keywords nil
                                     '(("\\S-\\([\240\040\t]+\\)$"
                                        (1 'show-ws-trailing-whitespace t))))))
-
-
-; FIXME: compute this color based on the current color-theme
-;(setq space-color "#562626")
-;(set-face-background 'show-ws-tab space-color)
-; FIXME: show-ws-trailing-whitespace should be strongly deprecated!
-;(set-face-background 'show-ws-trailing-whitespace space-color)
-;(set-face-background 'trailing-whitespace space-color)
 
 (provide 'ethan-wspace)
