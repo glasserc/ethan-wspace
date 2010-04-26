@@ -546,7 +546,8 @@ With arg, turn highlighting on if arg is positive, off otherwise."
 
 ;; show-trailing-whitespace uses the face `trailing-whitespace', so we
 ;; make this mirror `ethan-wspace-face'.
-(copy-face 'ethan-wspace-face 'trailing-whitespace)
+;(copy-face 'ethan-wspace-face 'trailing-whitespace)
+(face-spec-set 'trailing-whitespace (list (list t (face-attr-construct 'ethan-wspace-face))) nil)
 
 ;; Some pre/post command hooks for dealing with overlays
 (defun ethan-wspace-pre-command-hook ()
