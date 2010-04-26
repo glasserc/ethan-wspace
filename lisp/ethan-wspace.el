@@ -576,8 +576,10 @@ This just activates each whitespace type in this buffer."
 
 
 (defun ethan-wspace-update-buffer ()
-  (dolist (type ethan-wspace-errors)
-    (ethan-wspace-type-activate type)))
+  (dolist (type (ethan-wspace-all-error-types))
+    (if (not (memq type ethan-wspace-errors))
+        (ethan-wspace-type-deactivate type)
+      (ethan-wspace-type-activate type))))
 
 (defun ethan-wspace-is-buffer-appropriate ()
   ;;; FIXME: not OK for diff mode, non-file modes, etc?
