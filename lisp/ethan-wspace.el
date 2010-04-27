@@ -511,6 +511,32 @@ With arg, turn highlighting on if arg is positive, off otherwise."
                            :description "trailing newlines")
 
 
+;;; Mode-Line stuff
+(defun ethan-wspace-type-get-mode-line-letter (type-name)
+  (downcase
+   (let ((letter (ethan-wspace-type-get-field (ethan-wspace-get-type type-name) :letter)))
+     (if letter letter
+       (substring (symbol-name type-name) 0 1)))))
+
+(defun ethan-wspace-type-get-mode-line-element (type-name)
+  (list
+   (list (ethan-wspace-type-clean-mode-symbol type-name)
+         (ethan-wspace-type-get-mode-line-letter type-name))
+   (list (ethan-wspace-type-get-field (ethan-wspace-get-type type-name) :highlight)
+         (capitalize (ethan-wspace-type-get-mode-line-letter type-name)))))
+
+(defvar ethan-wspace-mode-line-element
+  (let ((mode-line '(" ew:")))
+    (mapcar (lambda (type)
+              (setq mode-line
+                    (cons (ethan-wspace-type-get-mode-line-element type) mode-line)))
+            (ethan-wspace-all-error-types))
+    (list (reverse mode-line)))
+  "The mode-line element for ethan-wspace.
+
+Typically looks like: \"ew:tLNm\".")
+
+
 ;;; ethan-wspace-mode: doing stuff for all types.
 (defgroup ethan-wspace nil
   "Be extremely OCD about whitespace in files."
@@ -577,7 +603,7 @@ A useful hook might be:
   "Minor mode for coping with whitespace.
 
 This just activates each whitespace type in this buffer."
-  :init-value nil :lighter nil :keymap nil
+  :init-value nil :lighter ethan-wspace-mode-line-element :keymap nil
   ;(message "Turning on ethan-wspace mode for %s" (buffer-file-name))
   (if ethan-wspace-mode
       (progn
