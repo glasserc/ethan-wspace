@@ -360,7 +360,8 @@ This internally uses `show-trailing-whitespace'."
 
 (ethan-wspace-declare-type eol :find ethan-wspace-type-eol-find
                            :clean ethan-wspace-type-eol-clean
-                           :highlight ethan-wspace-highlight-eol-mode)
+                           :highlight ethan-wspace-highlight-eol-mode
+                           :letter "l" )   ; for "lines"
 
 
 ;;; "No newline at end of file": symbol `no-nl-eof'
