@@ -123,7 +123,8 @@ Options recognized: :find :clean :highlight :description
         (highlight-mode-name (concat "ethan-wspace-highlight-" name-str "-mode"))
         (highlight-mode (intern highlight-mode-name))
         (description (or (plist-get args :description)
-                         name-str)))
+                         (and (plist-put args :description name-str)
+                              name-str))))
   `(progn
      (ethan-wspace-add-type ',name ',args)
      (define-minor-mode ,clean-mode
@@ -535,6 +536,7 @@ With arg, turn highlighting on if arg is positive, off otherwise."
   "The mode-line element for ethan-wspace.
 
 Typically looks like: \"ew:tLNm\".")
+(put 'ethan-wspace-mode-line-element 'risky-local-variable t)
 
 
 ;;; ethan-wspace-mode: doing stuff for all types.
