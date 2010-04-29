@@ -79,7 +79,7 @@
   (plist-get (cdr type) field))
 
 (defun ethan-wspace-all-error-types ()
-  "The list of all currently-defined types."
+  "The list of all currently-defined types as symbol names."
   ;; Repeated loads could define types multiple times, so we define
   ;; this slightly ugly mechanism that stores symbols uniquely in an
   ;; association list, and then pulls out the names.
@@ -124,7 +124,10 @@ Options recognized: :find :clean :highlight :description
         (highlight-mode (intern highlight-mode-name))
         (description (or (plist-get args :description)
                          (and (plist-put args :description name-str)
-                              name-str))))
+                              name-str)))
+        (letter (or (plist-get args :letter)
+                    (and (plist-put args :letter (substring (symbol-name name) 0 1))
+                         (plist-get args :letter)))))
   `(progn
      (ethan-wspace-add-type ',name ',args)
      (define-minor-mode ,clean-mode
@@ -227,6 +230,13 @@ Set `value' to -1 to deactivate a highlight-mode."
          (highlight-mode (ethan-wspace-type-get-field type :highlight)))
     (apply highlight-mode (list (or value 1)))))
 
+(defun ethan-wspace-type-name-from-indicator (indicator)
+  (let ((found nil))
+    (dolist (elt (ethan-wspace-all-error-types))
+      (when (equal (ethan-wspace-type-get-field (ethan-wspace-get-type elt) :letter) (downcase indicator))
+        (setq found elt)))
+    (unless found (error "Type not found for indicator %s" indicator))
+    found))
 
 ;;; TABS
 (defvar ethan-wspace-type-tabs-regexp "\t+"
@@ -513,18 +523,49 @@ With arg, turn highlighting on if arg is positive, off otherwise."
 
 
 ;;; Mode-Line stuff
-(defun ethan-wspace-type-get-mode-line-letter (type-name)
-  (downcase
-   (let ((letter (ethan-wspace-type-get-field (ethan-wspace-get-type type-name) :letter)))
-     (if letter letter
-       (substring (symbol-name type-name) 0 1)))))
+(defun ethan-wspace-type-get-mode-line-clean-help (type-name)
+  "Generate a help-echo text for clean-mode letters for `type-name'."
+  (let* ((type (ethan-wspace-get-type type-name))
+         (friendly-name (ethan-wspace-type-get-field type :description)))
+    (format "Cleaning %s\nmouse-1: Switch to highlighting %s\nmouse-2: Show help for minor mode\nmouse-3: Toggle minor modes" friendly-name friendly-name)))
+
+(defun ethan-wspace-type-get-mode-line-highlight-help (type-name)
+  "Generate a help-echo text for clean-mode letters for `type-name'."
+  (let* ((type (ethan-wspace-get-type type-name))
+         (friendly-name (ethan-wspace-type-get-field type :description)))
+    (format "Highlighting %s\nmouse-1: Switch to cleaning %s\nmouse-2: Show help for minor mode\nmouse-3: Toggle minor modes" friendly-name friendly-name)))
+
+(defun ethan-wspace-menu-activate-clean (event)
+  (interactive "@e")
+  (let ((indicator (car (nth 4 (car (cdr event))))))
+    (ethan-wspace-type-activate-clean (ethan-wspace-type-name-from-indicator indicator))))
+
+(defun ethan-wspace-menu-activate-highlight (event)
+  (interactive "@e")
+  (let ((indicator (car (nth 4 (car (cdr event))))))
+    (ethan-wspace-type-activate-highlight (ethan-wspace-type-name-from-indicator indicator))))
 
 (defun ethan-wspace-type-get-mode-line-element (type-name)
-  (list
-   (list (ethan-wspace-type-clean-mode-symbol type-name)
-         (ethan-wspace-type-get-mode-line-letter type-name))
-   (list (ethan-wspace-type-get-field (ethan-wspace-get-type type-name) :highlight)
-         (capitalize (ethan-wspace-type-get-mode-line-letter type-name)))))
+  (let* ((type (ethan-wspace-get-type type-name))
+         (letter (ethan-wspace-type-get-field type :letter))
+         (cap-letter (capitalize letter))
+         (clean-mode (ethan-wspace-type-clean-mode-symbol type-name))
+         (highlight  (ethan-wspace-type-get-field (ethan-wspace-get-type type-name) :highlight)))
+    (list
+     (list clean-mode
+           (list :propertize letter
+                       'help-echo (ethan-wspace-type-get-mode-line-clean-help type-name)
+                       'local-map '(keymap
+                                    (mode-line keymap
+                                               (down-mouse-1 . ethan-wspace-menu-activate-highlight)))
+                       'mouse-face 'mode-line-highlight))
+     (list highlight
+           (list :propertize cap-letter
+                       'help-echo (ethan-wspace-type-get-mode-line-highlight-help type-name)
+                       'local-map '(keymap
+                                    (mode-line keymap
+                                               (down-mouse-1 . ethan-wspace-menu-activate-clean)))
+                       'mouse-face 'mode-line-highlight)))))
 
 (defvar ethan-wspace-mode-line-element
   (let ((mode-line '(" ew:")))
