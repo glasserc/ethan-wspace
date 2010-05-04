@@ -615,9 +615,13 @@ Typically looks like: \"ew:tLNm\".")
          (rgb (color-values bg))
          (new-color (ethan-wspace-alpha-blend rgb '(65535 0 0) 0.2))
          (hex (apply 'format "#%04x%04x%04x" new-color)))
+    (setq ethan-wspace-against-background bg)
     (list :background hex)))
 
 ;; FIXME: some way to keep trailing-whitespace in sync with this?
+(defvar ethan-wspace-against-background nil
+  "The last background we used to compute ethan-wspace-face.")
+
 (defface ethan-wspace-face
   `((t ,(ethan-wspace-appropriate-face)))
   "Face used to highlight whitespace.
@@ -633,11 +637,13 @@ Ideally it is visible without being obtrusive."
 
 (ethan-wspace-face-updated)
 
-(defun ethan-wspace-set-face (&optional frame)
-  (face-spec-set 'ethan-wspace-face (list (list t (ethan-wspace-appropriate-face frame))))
-  (ethan-wspace-face-updated))
+(defun ethan-wspace-update-face (&optional frame)
+  (unless (eq ethan-wspace-against-background (aget (frame-parameters frame) 'background-color))
+    ;(message "updating face for frame %s : was %S, now %S" frame ethan-wspace-against-background (aget (frame-parameters frame) 'background-color))
+    (face-spec-set 'ethan-wspace-face (list (list t (ethan-wspace-appropriate-face frame))))
+    (ethan-wspace-face-updated)))
 
-(add-hook 'window-configuration-change-hook 'ethan-wspace-set-face)
+(add-hook 'window-configuration-change-hook 'ethan-wspace-update-face)
 
 ;; Some pre/post command hooks for dealing with overlays
 (defun ethan-wspace-pre-command-hook ()
