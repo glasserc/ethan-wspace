@@ -626,7 +626,20 @@ Typically looks like: \"ew:tLNm\".")
   `((t ,(ethan-wspace-appropriate-face)))
   "Face used to highlight whitespace.
 
-Ideally it is visible without being obtrusive."
+Ideally it is visible without being obtrusive.
+
+This face gets updated automatically whenever the
+background-color of the frame is changed. If you want to
+customize this face yourself, please set ethan-wspace-face-customized."
+  :group 'ethan-wspace)
+
+(defcustom ethan-wspace-face-customized nil
+  "Whether the whitespace face has been customized.
+
+If this is `nil', we recompute an appropriate face by
+alpha-blending some red onto the frame background color every
+time the frame background color changes. If `t', we assume the
+user knows best."
   :group 'ethan-wspace)
 
 ;; show-trailing-whitespace uses the face `trailing-whitespace', so we
@@ -638,7 +651,9 @@ Ideally it is visible without being obtrusive."
 (ethan-wspace-face-updated)
 
 (defun ethan-wspace-update-face (&optional frame)
-  (unless (eq ethan-wspace-against-background (aget (frame-parameters frame) 'background-color))
+  (unless (or ethan-wspace-face-customized
+              (eq ethan-wspace-against-background
+                  (aget (frame-parameters frame) 'background-color)))
     ;(message "updating face for frame %s : was %S, now %S" frame ethan-wspace-against-background (aget (frame-parameters frame) 'background-color))
     (face-spec-set 'ethan-wspace-face (list (list t (ethan-wspace-appropriate-face frame))))
     (ethan-wspace-face-updated)))
