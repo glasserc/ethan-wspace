@@ -605,21 +605,39 @@ Typically looks like: \"ew:tLNm\".")
     newcolor))
 
 (defun ethan-wspace-appropriate-face (&optional frame)
-  (let* ((bg (aget (frame-parameters frame) 'background-color))
+  (let* ((bg (let
+                 ((frameprop (aget (frame-parameters frame) 'background-color)))
+               (if (or (null frameprop) ; try to handle undefined bgs by using white
+                       (equal "unspecified" frameprop)
+                       (equal "unspecified-bg" frameprop))
+                   "white"
+                 frameprop)))
          (rgb (color-values bg))
          (new-color (ethan-wspace-alpha-blend rgb '(65535 0 0) 0.2))
          (hex (apply 'format "#%04x%04x%04x" new-color)))
     (list :background hex)))
 
+;; FIXME: some way to keep trailing-whitespace in sync with this?
 (defface ethan-wspace-face
   `((t ,(ethan-wspace-appropriate-face)))
-  "FIXME: compute this from color-theme or something"
+  "Face used to highlight whitespace.
+
+Ideally it is visible without being obtrusive."
   :group 'ethan-wspace)
 
 ;; show-trailing-whitespace uses the face `trailing-whitespace', so we
 ;; make this mirror `ethan-wspace-face'.
 ;(copy-face 'ethan-wspace-face 'trailing-whitespace)
-(face-spec-set 'trailing-whitespace (list (list t (face-attr-construct 'ethan-wspace-face))) nil)
+(defun ethan-wspace-face-updated ()
+  (face-spec-set 'trailing-whitespace (list (list t (face-attr-construct 'ethan-wspace-face))) nil))
+
+(ethan-wspace-face-updated)
+
+(defun ethan-wspace-set-face (&optional frame)
+  (face-spec-set 'ethan-wspace-face (list (list t (ethan-wspace-appropriate-face frame))))
+  (ethan-wspace-face-updated))
+
+(add-hook 'window-configuration-change-hook 'ethan-wspace-set-face)
 
 ;; Some pre/post command hooks for dealing with overlays
 (defun ethan-wspace-pre-command-hook ()
