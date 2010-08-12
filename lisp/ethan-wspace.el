@@ -646,12 +646,16 @@ user knows best."
 ;; make this mirror `ethan-wspace-face'.
 ;(copy-face 'ethan-wspace-face 'trailing-whitespace)
 (defun ethan-wspace-face-updated ()
-  (face-spec-set 'trailing-whitespace (list (list t (face-attr-construct 'ethan-wspace-face))) nil))
+  (let ((attribs (list (list t (face-attr-construct 'ethan-wspace-face)))))
+    (face-spec-set 'trailing-whitespace attribs nil)))
 
 (ethan-wspace-face-updated)
 
 (defun ethan-wspace-update-face (&optional frame)
+  ;(message "Computing face %S %s %S" frame (frame-parameter frame 'name) (frame-parameters frame))
   (unless (or ethan-wspace-face-customized
+              ; Don't compute face for tooltips; causes breakage with "Invalid face"
+              (equal (frame-parameter frame 'name) "tooltip")
               (eq ethan-wspace-against-background
                   (aget (frame-parameters frame) 'background-color)))
     ;(message "updating face for frame %s : was %S, now %S" frame ethan-wspace-against-background (aget (frame-parameters frame) 'background-color))
