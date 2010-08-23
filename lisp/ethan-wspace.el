@@ -84,7 +84,7 @@
   ;; this slightly ugly mechanism that stores symbols uniquely in an
   ;; association list, and then pulls out the names.
   (let ((type-names nil))
-    (mapcar '(lambda (type) (aput 'type-names (car type) t)) ethan-wspace-types)
+    (mapc '(lambda (type) (aput 'type-names (car type) t)) ethan-wspace-types)
     (mapcar 'car type-names)))
 
 (defun ethan-wspace-buffer-errors ()
@@ -570,7 +570,7 @@ With arg, turn highlighting on if arg is positive, off otherwise."
 
 (defvar ethan-wspace-mode-line-element
   (let ((mode-line '(" ew:")))
-    (mapcar (lambda (type)
+    (mapc (lambda (type)
               (setq mode-line
                     (cons (ethan-wspace-type-get-mode-line-element type) mode-line)))
             (ethan-wspace-all-error-types))
