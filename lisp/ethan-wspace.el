@@ -686,6 +686,7 @@ A useful hook might be:
 
   (lambda () (setq ethan-wspace-errors (remove 'tabs ethan-wspace-errors)))")
 
+;;;###autoload
 (define-minor-mode ethan-wspace-mode
   "Minor mode for coping with whitespace.
 
@@ -697,10 +698,13 @@ This just activates each whitespace type in this buffer."
         (run-hooks 'ethan-wspace-errors-in-buffer-hook)
         (ethan-wspace-update-buffer)
         (add-hook 'pre-command-hook 'ethan-wspace-pre-command-hook nil t)
-        (add-hook 'post-command-hook 'ethan-wspace-post-command-hook nil t))
+        (add-hook 'post-command-hook 'ethan-wspace-post-command-hook nil t)
+        (add-hook 'hack-local-variables-hook
+                  (function ethan-wspace-hack-local-variables-hook) t t))
     (remove-hook 'pre-command-hook  'ethan-wspace-pre-command-hook t)
-    (remove-hook 'post-command-hook 'ethan-wspace-command-hook t)))
-
+    (remove-hook 'post-command-hook 'ethan-wspace-command-hook t)
+    (remove-hook 'hack-local-variables-hook
+                 (function ethan-wspace-hack-local-variables-hook) t)))
 
 (defun ethan-wspace-update-buffer ()
   (interactive)
@@ -731,6 +735,9 @@ This just activates each whitespace type in this buffer."
           (ethan-wspace-type-clean type)))))
 
 (add-hook 'before-save-hook 'ethan-wspace-clean-before-save-hook)
+
+(defun ethan-wspace-hack-local-variables-hook ()
+        (ethan-wspace-update-buffer))
 
 ;; Diff mode.
 ;;
