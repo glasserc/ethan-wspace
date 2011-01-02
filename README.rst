@@ -199,7 +199,7 @@ More ranting about Tabs Are Evil
 ================================
 
 Required reading for this discussion is JWZ's "famous" `tabs versus
-spaces <http://www.jwz.org/gruntle/tabs-versus-spaces.html>`_ post. He
+spaces <http://www.jwz.org/doc/tabs-vs-spaces.html>`_ post. He
 sets out three categories of effect that tabs have, and how to defuse
 the whole situation.
 
