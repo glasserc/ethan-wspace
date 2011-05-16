@@ -99,31 +99,29 @@ something like the following::
 How to use it
 =============
 
-For a full emacs config that uses ethan-wspace, please see
-http://github.com/glasserc/etc. I'd suggest you start keeping your
-dot-rc files in source control too. If you're using git, you can make
-a submodule that points to this repository, and in this way keep on
-top of changes.
+N.B. There's now a recipe for ethan-wspace in el-get!  To use it, add
+something like the following to your el-get-sources::
 
-The essential aspects here are to add the ``lisp`` directory to your
-``load-path``, and then ``(require 'ethan-wspace)``. In other words,
-add to your ``init.el`` something like the following::
+    (:name ethan-wspace
+           :after (lambda () (global-ethan-wspace-mode 1)))
+
+If you're not using el-get, you need to manually make sure to add the
+``lisp`` directory to your ``load-path``, and then ``(require
+'ethan-wspace)``. In other words, add to your ``init.el`` something
+like the following::
 
     (add-to-list 'load-path (expand-file-name "~/.emacs.d/upstream/ethan-wspace.git/lisp"))
     (require 'ethan-wspace)
     (global-ethan-wspace-mode 1)
 
-(I keep all my git-based upstreams in a ``contrib`` directory, and
-symlink the directories with lisp source code into
-``~/.emacs.d/packages``, but your mileage may vary.)
-
 You should also remove any customizations you have made to turn on
 either ``show-trailing-whitespace`` or ``require-final-newline``; we
 handle those for you.
 
-When you open files, bad whitespace will be highlit and clean
-whitespace will be maintained. You can switch from one to the other
-using ``M-x ethan-wspace-highlight-FOO-mode`` or ``M-x
+When you open files (N.B. but not non-file buffers), bad whitespace
+will be highlit and clean whitespace will be maintained. You can
+switch from one to the other using ``M-x
+ethan-wspace-highlight-FOO-mode`` or ``M-x
 ethan-wspace-clean-FOO-mode`` (each mode disables the other).  If you
 want to begin cleaning all whitespace, you can use ``M-x
 ethan-wspace-clean-all-modes``.
