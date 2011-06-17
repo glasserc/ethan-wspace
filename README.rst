@@ -4,6 +4,12 @@ ethan-wspace
 Presenting, with tongue firmly in cheek: ethan-wspace, the definitive
 emacs customizations for people who are OCD about whitespace.
 
+It is BSD licensed and currently only 44 kb.  You really have no
+reason not to use it.
+
+Motivation
+==========
+
 You may have some opinions about whitespace in your source code. They
 may even amount to preferences. However, it takes a seriously twisted
 person to think about whitespace obsessively. I have. Unless you
