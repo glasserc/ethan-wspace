@@ -716,7 +716,8 @@ This just activates each whitespace type in this buffer."
     (remove-hook 'pre-command-hook  'ethan-wspace-pre-command-hook t)
     (remove-hook 'post-command-hook 'ethan-wspace-command-hook t)
     (remove-hook 'hack-local-variables-hook
-                 (function ethan-wspace-hack-local-variables-hook) t)))
+                 (function ethan-wspace-hack-local-variables-hook) t)
+    (ethan-wspace-clean-exit)))
 
 (defun ethan-wspace-update-buffer ()
   (interactive)
@@ -724,6 +725,10 @@ This just activates each whitespace type in this buffer."
     (if (not (memq type ethan-wspace-errors))
         (ethan-wspace-type-deactivate type)
       (ethan-wspace-type-activate type))))
+
+(defun ethan-wspace-clean-exit ()
+  (dolist (type (ethan-wspace-all-error-types))
+    (ethan-wspace-type-deactivate type)))
 
 (defun ethan-wspace-clean-all-modes ()
   "*Turn on clean mode for all whitespace modes."
