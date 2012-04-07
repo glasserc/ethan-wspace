@@ -656,12 +656,7 @@ user knows best."
 
 ;; show-trailing-whitespace uses the face `trailing-whitespace', so we
 ;; make this mirror `ethan-wspace-face'.
-;(copy-face 'ethan-wspace-face 'trailing-whitespace)
-(defun ethan-wspace-face-updated ()
-  (let ((attribs (list (list t (face-attr-construct 'ethan-wspace-face)))))
-    (face-spec-set 'trailing-whitespace attribs nil)))
-
-(ethan-wspace-face-updated)
+(put 'trailing-whitespace 'face-alias 'ethan-wspace-face)
 
 (defun ethan-wspace-update-face (&optional frame)
   ;(message "Computing face %S %s %S" frame (frame-parameter frame 'name) (frame-parameters frame))
@@ -671,8 +666,7 @@ user knows best."
               (eq ethan-wspace-against-background
                   (aget (frame-parameters frame) 'background-color)))
     ;(message "updating face for frame %s : was %S, now %S" frame ethan-wspace-against-background (aget (frame-parameters frame) 'background-color))
-    (face-spec-set 'ethan-wspace-face (list (list t (ethan-wspace-appropriate-face frame))))
-    (ethan-wspace-face-updated)))
+    (face-spec-set 'ethan-wspace-face (list (list t (ethan-wspace-appropriate-face frame))))))
 
 (add-hook 'window-configuration-change-hook 'ethan-wspace-update-face)
 
