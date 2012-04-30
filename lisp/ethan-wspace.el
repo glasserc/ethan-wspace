@@ -312,7 +312,8 @@ This supercedes (require 'show-wspace) and show-ws-highlight-tabs."
   (if ethan-wspace-highlight-tabs-mode
       (font-lock-add-keywords nil (list ethan-wspace-type-tabs-keyword))
     (font-lock-remove-keywords nil (list ethan-wspace-type-tabs-keyword)))
-  (font-lock-fontify-buffer))
+  (when font-lock-mode ; may be not initialized yet
+    (font-lock-fontify-buffer)))
 
 (ethan-wspace-declare-type tabs :find ethan-wspace-type-tabs-find
                            :clean ethan-wspace-untabify :highlight ethan-wspace-highlight-tabs-mode
