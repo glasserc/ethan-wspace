@@ -630,7 +630,6 @@ Typically looks like: \"ew:tLNm\".")
     (setq ethan-wspace-against-background bg)
     (list :background hex)))
 
-;; FIXME: some way to keep trailing-whitespace in sync with this?
 (defvar ethan-wspace-against-background nil
   "The last background we used to compute ethan-wspace-face.")
 
