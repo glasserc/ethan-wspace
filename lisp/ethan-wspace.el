@@ -73,7 +73,6 @@
 ;; Currently each whitespace type is represented as an association list
 ;; with keys :check, :clean, and :highlight, and values symbols of functions
 ;; or whatever.
-(require 'assoc)
 
 (defvar ethan-wspace-types nil
   "The list of all known whitespace types.")
@@ -81,7 +80,7 @@
 ;; Define the format/structure for the each wspace type. Right now it's
 ;; (name . (:foo bar :baz quux)), aka (name :foo bar :baz :quux).
 (defun ethan-wspace-add-type (name args)
-  (aput 'ethan-wspace-types name args))
+  (push (name args) 'ethan-wspace-types))
 
 (defun ethan-wspace-get-type (name)
   (or (assq name ethan-wspace-types)
@@ -92,12 +91,10 @@
 
 (defun ethan-wspace-all-error-types ()
   "The list of all currently-defined types as symbol names."
-  ;; Repeated loads could define types multiple times, so we define
-  ;; this slightly ugly mechanism that stores symbols uniquely in an
-  ;; association list, and then pulls out the names.
-  (let ((type-names nil))
-    (mapc '(lambda (type) (aput 'type-names (car type) t)) ethan-wspace-types)
-    (mapcar 'car type-names)))
+  ;; Repeated loads could define types multiple times, so we
+  ;; deduplicate before returning.
+  (let ((type-names (mapcar 'car ethan-wspace-types)))
+    (delete-dups type-names)))
 
 (defun ethan-wspace-buffer-errors ()
   (let ((errors nil))
