@@ -80,7 +80,7 @@
 ;; Define the format/structure for the each wspace type. Right now it's
 ;; (name . (:foo bar :baz quux)), aka (name :foo bar :baz :quux).
 (defun ethan-wspace-add-type (name args)
-  (push (name args) 'ethan-wspace-types))
+  (push (name args) ethan-wspace-types))
 
 (defun ethan-wspace-get-type (name)
   (or (assq name ethan-wspace-types)
