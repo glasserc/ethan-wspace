@@ -65,6 +65,9 @@
 ;; FIXME: buffer-local-ize ethan-wspace-errors
 ;;
 ;; FIXME: coding conventions suggest adding a ethan-wspace-unload-hook to unhook
+;;
+;; FIXME: warn if no-nl highlighting is turned on and
+;;    require-final-newline is on. Maybe even turn it off?
 
 ;; We store the whitespace types here.
 ;; Currently each whitespace type is represented as an association list

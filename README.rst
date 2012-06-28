@@ -122,7 +122,9 @@ like the following::
 
 You should also remove any customizations you have made to turn on
 either ``show-trailing-whitespace`` or ``require-final-newline``; we
-handle those for you.
+handle those for you. (But note that ``require-final-newline`` is
+turned on by some modes based on the value of
+``mode-require-final-newline``.)
 
 When you open files (N.B. but not non-file buffers), bad whitespace
 will be highlit and clean whitespace will be maintained. You can
