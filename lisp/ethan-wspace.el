@@ -618,7 +618,7 @@ Typically looks like: \"ew:tLNm\".")
 
 (defun ethan-wspace-appropriate-face (&optional frame)
   (let* ((bg (let
-                 ((frameprop (aget (frame-parameters frame) 'background-color)))
+                 ((frameprop (cdr (assoc 'background-color (frame-parameters frame)))))
                (if (or (null frameprop) ; try to handle undefined bgs by using white
                        (equal "unspecified" frameprop)
                        (equal "unspecified-bg" frameprop))
@@ -663,8 +663,8 @@ user knows best."
               ; Don't compute face for tooltips; causes breakage with "Invalid face"
               (equal (frame-parameter frame 'name) "tooltip")
               (eq ethan-wspace-against-background
-                  (aget (frame-parameters frame) 'background-color)))
-    ;(message "updating face for frame %s : was %S, now %S" frame ethan-wspace-against-background (aget (frame-parameters frame) 'background-color))
+                  (cdr (assoc 'background-color (frame-parameters frame)))))
+    ;(message "updating face for frame %s : was %S, now %S" frame ethan-wspace-against-background (assoc 'background-color (frame-parameters frame)))
     (face-spec-set 'ethan-wspace-face (list (list t (ethan-wspace-appropriate-face frame))))))
 
 (add-hook 'window-configuration-change-hook 'ethan-wspace-update-face)
