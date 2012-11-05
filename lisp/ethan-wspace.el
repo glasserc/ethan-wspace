@@ -140,10 +140,12 @@ Options recognized: :find :clean :highlight :description
   `(progn
      (ethan-wspace-add-type ',name ',args)
      (define-minor-mode ,clean-mode
-       ,(format "Verify that %s are clean in this buffer.
+       ,(format "Verify that this buffer is cleaned of %s.
 
-Works as a save-file hook that cleans %s.
-Turning this mode on turns off highlighting %s, and vice versa." description description description)
+Works as a save-file hook that cleans %s; that is, makes
+sure that the buffer never has %s.
+
+Turning this mode on turns off highlighting %s, and vice versa." description description description description)
        :init-value nil :lighter nil :keymap nil
        ;; FIXME: Body goes here
 )
@@ -476,7 +478,7 @@ With arg, turn highlighting on if arg is positive, off otherwise."
 (ethan-wspace-declare-type no-nl-eof :find ethan-wspace-type-no-nl-eof-find
                            :clean ethan-wspace-type-no-nl-eof-clean
                            :highlight ethan-wspace-highlight-no-nl-eof-mode
-                           :description "trailing newlines")
+                           :description "no trailing newlines")
 
 
 ;;; More than one newline at end of file: symbol `many-nls-eof'
@@ -533,7 +535,7 @@ With arg, turn highlighting on if arg is positive, off otherwise."
 (ethan-wspace-declare-type many-nls-eof :find ethan-wspace-type-many-nls-eof-find
                            :clean ethan-wspace-type-many-nls-eof-clean
                            :highlight ethan-wspace-highlight-many-nls-eof-mode
-                           :description "trailing newlines")
+                           :description "many trailing newlines")
 
 
 ;;; Mode-Line stuff
