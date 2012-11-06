@@ -476,7 +476,7 @@ With arg, turn highlighting on if arg is positive, off otherwise."
 (ethan-wspace-declare-type no-nl-eof :find ethan-wspace-type-no-nl-eof-find
                            :clean ethan-wspace-type-no-nl-eof-clean
                            :highlight ethan-wspace-highlight-no-nl-eof-mode
-                           :description "trailing newlines")
+                           :description "missing newline at eof")
 
 
 ;;; More than one newline at end of file: symbol `many-nls-eof'
@@ -533,7 +533,7 @@ With arg, turn highlighting on if arg is positive, off otherwise."
 (ethan-wspace-declare-type many-nls-eof :find ethan-wspace-type-many-nls-eof-find
                            :clean ethan-wspace-type-many-nls-eof-clean
                            :highlight ethan-wspace-highlight-many-nls-eof-mode
-                           :description "trailing newlines")
+                           :description "extra trailing newlines")
 
 
 ;;; Mode-Line stuff
