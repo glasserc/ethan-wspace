@@ -171,6 +171,9 @@ to be the most egotistically-named package.) ``ethan-wspace`` subsumes most of t
   never heard about this package and hopefully ``ethan-wspace`` will
   grow similar functionality soon.
 
+* `ws-butler <https://github.com/lewang/ws-butler>`_ automatically
+  trims whitespace on edited lines too, like an improved ws-trim.
+
 * Putting ``delete-trailing-whitespace`` or
   ``nuke-trailing-whitespace`` in your ``before-save-hook`` is now
   obsolete; these functions are too aggressive and will cause you many
