@@ -737,6 +737,7 @@ This just activates each whitespace type in this buffer."
   (when (buffer-file-name)
     (ethan-wspace-mode 1)))
 
+;;;###autoload
 (define-global-minor-mode global-ethan-wspace-mode
   ethan-wspace-mode ethan-wspace-is-buffer-appropriate
   :init-value t)
