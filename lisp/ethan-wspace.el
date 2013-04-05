@@ -259,6 +259,10 @@ Set `value' to -1 to deactivate a highlight-mode."
     (let ((pos (re-search-forward ethan-wspace-type-tabs-regexp nil t)))
       (when pos (cons (match-beginning 0) (match-end 0))))))
 
+(defun ethan-wspace-inside-string-p ()
+  "T if point is inside a string, NIL otherwise."
+  (nth 3 (syntax-ppss)))
+
 (defun ethan-wspace-untabify (start end)
   "Like `untabify', but be more respectful of point.
 The standard `untabify' does not keep track of point when
@@ -288,7 +292,8 @@ For details on how we accomplish this, see the source."
     (save-restriction
       (narrow-to-region (point-min) end)
       (goto-char start)
-      (while (search-forward "\t" nil t)        ; faster than re-search
+      (while (and (search-forward "\t" nil t)   ; faster than re-search
+                  (not (ethan-wspace-inside-string-p)))
         (forward-char -1)
         (let ((tab-start (point))
               (column-start (current-column)))
