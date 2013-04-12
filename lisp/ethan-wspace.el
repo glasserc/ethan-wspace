@@ -387,14 +387,15 @@ This internally uses `show-trailing-whitespace'."
   ;(message "eol-clean")
   (let ((line-before-point
          (buffer-substring (line-beginning-position) (point))))
-    (save-restriction
-      (narrow-to-region begin end)
-      (delete-trailing-whitespace)
-      ;; Save the whitespace that was removed immediately before point; we'll
-      ;; restore it in the :fixup function.
-      (let* ((new-line-len (- (point) (line-beginning-position)))
-             (removed-ws (substring line-before-point new-line-len)))
-        (setq ethan-wspace-type-eol-clean-fixup-stash removed-ws)))))
+    ;; It's critical to specify begin and end explicitly, because
+    ;; delete-trailing-whitespace has a special case: if 'end' is nil, it also
+    ;; deletes eof trailing newlines.
+    (delete-trailing-whitespace begin end)
+    ;; Save the whitespace that was removed immediately before point; we'll
+    ;; restore it in the :fixup function.
+    (let* ((new-line-len (- (point) (line-beginning-position)))
+           (removed-ws (substring line-before-point new-line-len)))
+      (setq ethan-wspace-type-eol-clean-fixup-stash removed-ws))))
 
 (defun ethan-wspace-type-eol-clean-fixup ()
   (let ((whitespace-to-add ethan-wspace-type-eol-clean-fixup-stash)
