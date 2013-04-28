@@ -383,6 +383,17 @@ This internally uses `show-trailing-whitespace'."
   "Internal variable storing fixup information for eol cleaning")
 (make-variable-buffer-local 'ethan-wspace-type-eol-clean-fixup-stash)
 
+(defun ethan-wspace-delete-trailing-whitespace (begin end)
+  "Internal function to call delete-trailing-whitespace correctly.
+
+In emacs23, delete-trailing-whitespace does not take any
+arguments, whereas in emacs24 the same function will remove extra
+lines at EOF unless you explicitly pass begin and end.
+FIXME: maybe we should just write our own."
+  (if (< emacs-major-version 24)
+      (delete-trailing-whitespace)
+    (delete-trailing-whitespace begin end)))
+
 (defun ethan-wspace-type-eol-clean (begin end)
   ;(message "eol-clean")
   (let ((line-before-point
@@ -390,7 +401,7 @@ This internally uses `show-trailing-whitespace'."
     ;; It's critical to specify begin and end explicitly, because
     ;; delete-trailing-whitespace has a special case: if 'end' is nil, it also
     ;; deletes eof trailing newlines.
-    (delete-trailing-whitespace begin end)
+    (ethan-wspace-delete-trailing-whitespace begin end)
     ;; Save the whitespace that was removed immediately before point; we'll
     ;; restore it in the :fixup function.
     (let* ((new-line-len (- (point) (line-beginning-position)))
