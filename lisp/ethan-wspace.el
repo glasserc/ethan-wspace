@@ -412,7 +412,8 @@ FIXME: maybe we should just write our own."
   (let ((whitespace-to-add ethan-wspace-type-eol-clean-fixup-stash)
         (was-modified (buffer-modified-p)))
     ;(message "eol-clean-fixup: restoring '%s'" whitespace-to-add)
-    (insert whitespace-to-add)
+    (when whitespace-to-add
+        (insert whitespace-to-add))
     (set-buffer-modified-p was-modified)))
 
 (ethan-wspace-declare-type eol :find ethan-wspace-type-eol-find
@@ -535,7 +536,7 @@ With arg, turn highlighting on if arg is positive, off otherwise."
         (cons (- max (1- trailing-newlines)) max)
       nil)))
 
-(defvar ethan-wspace-type-many-nls-eof-clean-fixup-stash nil
+(defvar ethan-wspace-type-many-nls-eof-clean-fixup-stash 0
   "Internal variable storing fixup information for many-nls-eof cleaning")
 (make-variable-buffer-local 'ethan-wspace-type-nls-eof-clean-fixup-stash)
 
