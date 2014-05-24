@@ -772,6 +772,14 @@ This just activates each whitespace type in this buffer."
   ;(message "Changing ethan-wspace mode to %s for %s" ethan-wspace-mode (buffer-file-name))
   (if ethan-wspace-mode
       (progn
+        (when require-final-newline
+          ;; Because we handle final newlines ourselves, this is
+          ;; probably a bad configuration.
+          ;; If you hit this and you think your configuration is
+          ;; correct, please file a bug report explaining why.
+          (display-warning :warning "You have `require-final-newline' turned on.
+`ethan-wspace-highlight-no-nl-eof' will not work correctly. Please turn off
+`require-final-newline' and `mode-require-final-newline'."))
         (run-hooks 'ethan-wspace-errors-in-buffer-hook)
         (ethan-wspace-update-buffer)
         (add-hook 'pre-command-hook 'ethan-wspace-pre-command-hook nil t)
