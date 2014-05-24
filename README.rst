@@ -83,6 +83,19 @@ It recognizes these categories independently, and treats each category
 as clean or not-clean. The goal is always to make your diffs
 unambiguous. Laudable goal, right?
 
+ethan-wspace also has one other fancy feature. If you are editing some
+line, and are writing something at the end of it, and have added some
+spaces, but your cursor is just after those spaces, the spaces aren't
+considered "trailing" yet. They won't be highlit if you are in
+``highlight-eol-mode``. If you are in ``clean-eol-mode``, and you
+should save the buffer, the spaces will be cleaned, the buffer will be
+saved, and the spaces will be re-added for your convenience\
+[1]_. Similar behavior exists for newlines-at-end-of-file.
+
+.. [1] This may have the surprising behavior that your file appears
+       "clean" even though its contents are not exactly what is on
+       disk.
+
 My tabs! Get your hands off my tabs!
 ====================================
 
@@ -124,7 +137,7 @@ You should also remove any customizations you have made to turn on
 either ``show-trailing-whitespace`` or ``require-final-newline``; we
 handle those for you. (But note that ``require-final-newline`` is
 turned on by some modes based on the value of
-``mode-require-final-newline``.)
+``mode-require-final-newline``, so you may have to turn that off.)
 
 When you open files (N.B. but not non-file buffers), bad whitespace
 will be highlit and clean whitespace will be maintained. You can

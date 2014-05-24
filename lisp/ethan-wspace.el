@@ -54,20 +54,16 @@
 ;; show-trailing-whitespace will be turned on by ethan-wspace.
 ;;
 ;; Also disable '(require-final-newlines t); ethan-wspace will handle
-;; the final newlines.
+;; the final newlines. You might have to add
+;; '(mode-require-final-newlines nil).
 
 ;;; Code:
 ;;
 ;; FIXME: Coding conventions suggest using (define-* thing-name) for generated stuff.
 ;;
-;; FIXME: fancy lighter
-;;
 ;; FIXME: buffer-local-ize ethan-wspace-errors
 ;;
 ;; FIXME: coding conventions suggest adding a ethan-wspace-unload-hook to unhook
-;;
-;; FIXME: warn if no-nl highlighting is turned on and
-;;    require-final-newline is on. Maybe even turn it off?
 
 ;; We store the whitespace types here.
 ;; Currently each whitespace type is represented as an association list
