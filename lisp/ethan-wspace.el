@@ -759,6 +759,9 @@ A useful hook might be:
 
   (lambda () (setq ethan-wspace-errors (remove 'tabs ethan-wspace-errors)))")
 
+(defvar ethan-wspace-warned-mode-require-final-newline nil
+  "Has ethan-wspace already issued one warning about `mode-require-final-newline'?")
+
 ;;;###autoload
 (define-minor-mode ethan-wspace-mode
   "Minor mode for coping with whitespace.
@@ -768,14 +771,34 @@ This just activates each whitespace type in this buffer."
   ;(message "Changing ethan-wspace mode to %s for %s" ethan-wspace-mode (buffer-file-name))
   (if ethan-wspace-mode
       (progn
+        (when mode-require-final-newline
+          (when (not ethan-wspace-warned-mode-require-final-newline)
+            (display-warning :warning "You have `mode-require-final-newline'
+turned on. ethan-wspace supersedes `require-final-newline', so
+`mode-require-final-newline' will be turned off.
+
+You can disable this warning by customizing the variable
+`mode-require-final-newline' to be NIL."))
+          (setq require-final-newline nil
+                ethan-wspace-warned-mode-require-final-newline t))
+
         (when require-final-newline
-          ;; Because we handle final newlines ourselves, this is
-          ;; probably a bad configuration.
-          ;; If you hit this and you think your configuration is
-          ;; correct, please file a bug report explaining why.
-          (display-warning :warning "You have `require-final-newline' turned on.
-`ethan-wspace-highlight-no-nl-eof' will not work correctly. Please turn off
-`require-final-newline' and `mode-require-final-newline'."))
+          ;; require-final-newline defaults to nil, so if we get here,
+          ;; either the user configured it themselves, indicating a
+          ;; bad configuration, or some other piece of elisp code
+          ;; turned it on, which might indicate a bug in that code. If
+          ;; you see this warning, and you don't have any
+          ;; customizations for require-final-newline, please file a
+          ;; bug report.
+          (display-warning :warning "You have
+`require-final-newline' turned on.  ethan-wspace supersedes
+`require-final-newline', and so `require-final-newline' will be
+turned off.  If you turned on `require-final-newline' in your
+customizations, you can disable this warning by removing these
+customizations.  Otherwise, please file a bug report, as some
+other code has turned on `require-final-newline'.")
+          (setq require-final-newline nil))
+
         (run-hooks 'ethan-wspace-errors-in-buffer-hook)
         (ethan-wspace-update-buffer)
         (add-hook 'pre-command-hook 'ethan-wspace-pre-command-hook nil t)
