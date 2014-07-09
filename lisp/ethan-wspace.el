@@ -857,6 +857,14 @@ other code has turned on `require-final-newline'.")
 (defun ethan-wspace-hack-local-variables-hook ()
         (ethan-wspace-update-buffer))
 
+(defun ethan-wspace-clean-all ()
+  "Clean all whitespace errors immediately and turn on
+`ethan-wspace-clean-all-modes`."
+  (interactive)
+  (dolist (type ethan-wspace-errors)
+    (ethan-wspace-type-clean type))
+  (ethan-wspace-clean-all-modes))
+
 ;; Diff mode.
 ;;
 ;; Every line in a diff starts with a plus, a minus, or a space -- so
