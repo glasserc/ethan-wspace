@@ -106,6 +106,15 @@ understands this point and the reasoning behind it. If you disagree,
 please see `Tabs Are Evil
 <http://www.emacswiki.org/emacs/TabsAreEvil>`_ on the EmacsWiki.
 
+One notable exception to this situation is if you are unfortunate
+enough to have to work with Makefiles. In these files, tabs are
+essential. You can tell ethan-wspace to stop caring about tabs at all
+in this context using configuration like the following::
+
+    (defun makefile-tabs-are-less-evil ()
+      (setq ethan-wspace-errors (remove 'tabs ethan-wspace-errors))
+    (add-hook 'makefile-mode-hook 'makefile-tabs-are-less-evil)
+
 Perhaps you are one of those bizarre creatures who uses `Smart Tabs
 <http://www.emacswiki.org/emacs/SmartTabs>`_. In that case, you are
 even more OCD about whitespace than I am, and in a twisted way I
