@@ -112,7 +112,7 @@ essential. You can tell ethan-wspace to stop caring about tabs at all
 in this context using configuration like the following::
 
     (defun makefile-tabs-are-less-evil ()
-      (setq ethan-wspace-errors (remove 'tabs ethan-wspace-errors))
+      (setq ethan-wspace-errors (remove 'tabs ethan-wspace-errors)))
     (add-hook 'makefile-mode-hook 'makefile-tabs-are-less-evil)
 
 Perhaps you are one of those bizarre creatures who uses `Smart Tabs
