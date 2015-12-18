@@ -148,6 +148,11 @@ handle those for you. (But note that ``require-final-newline`` is
 turned on by some modes based on the value of
 ``mode-require-final-newline``, so you may have to turn that off.)
 
+::
+
+   (custom-set-variable
+     '(mode-require-final-newline nil))
+
 When you open files (N.B. but not non-file buffers), bad whitespace
 will be highlit and clean whitespace will be maintained by cleaning
 just before files are saved. You can switch from one to the other
