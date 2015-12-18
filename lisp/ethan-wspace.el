@@ -779,7 +779,7 @@ turned on. ethan-wspace supersedes `require-final-newline', so
 
 You can disable this warning by customizing the variable
 `mode-require-final-newline' to be NIL."))
-          (setq require-final-newline nil
+          (setq mode-require-final-newline nil
                 ethan-wspace-warned-mode-require-final-newline t))
 
         (when require-final-newline
