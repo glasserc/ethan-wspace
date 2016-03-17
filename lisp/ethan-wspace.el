@@ -513,8 +513,8 @@ With arg, turn highlighting on if arg is positive, off otherwise."
       (goto-char (point-max))
       (let* ((str-len (- (frame-width) (current-column)
                          1))  ; subtract one so that we don't trigger line-wrap
-             (str (concat "eof" (make-string (- str-len 3) ?\ ))))
-        (set-text-properties 0 str-len '(face ethan-wspace-face) str)
+             (str (concat "eof" (make-string (max 0 (- str-len 3)) ?\ ))))
+        (set-text-properties 0 (max 0 str-len) '(face ethan-wspace-face) str)
         (set-text-properties 0 1 '(cursor t face ethan-wspace-face) str)
         (overlay-put ethan-wspace-highlight-no-nl-eof-overlay 'after-string str)))))
 
