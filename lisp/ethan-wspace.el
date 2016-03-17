@@ -830,7 +830,8 @@ other code has turned on `require-final-newline'.")
 
 (defun ethan-wspace-is-buffer-appropriate ()
   ;;; FIXME: not OK for diff mode, non-file modes, etc?
-  (when (buffer-file-name)
+  (when (and (buffer-file-name)
+             (not (eq buffer-file-coding-system 'no-conversion)))
     (ethan-wspace-mode 1)))
 
 ;;;###autoload
