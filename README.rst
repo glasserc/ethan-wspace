@@ -100,20 +100,27 @@ My tabs! Get your hands off my tabs!
 ====================================
 
 It is my opinion (and remember, my opinions are right) that you should
-never, ever have tabs in your source code, at all. This was once a
-holy war, but in my experience, pretty much everybody today
-understands this point and the reasoning behind it. If you disagree,
+never, ever have tabs in your source code, at all. If you disagree,
 please see `Tabs Are Evil
-<http://www.emacswiki.org/emacs/TabsAreEvil>`_ on the EmacsWiki.
+<http://www.emacswiki.org/emacs/TabsAreEvil>`_ on the EmacsWiki. This
+was once a holy war, and then for a time it was settled, but these
+days, the idea that tabs are acceptable is making a resurgence due to
+`gofmt <https://golang.org/cmd/gofmt/>`_.
 
-One notable exception to this situation is if you are unfortunate
-enough to have to work with Makefiles. In these files, tabs are
-essential. You can tell ethan-wspace to stop caring about tabs at all
-in this context using configuration like the following::
+You may be unfortunate enough to have to deal with files where tabs
+are significant or even common. Apart from go code, there are also
+Makefiles, where tabs are essential. Current versions of
+``ethan-wspace`` check for ``indent-tabs-mode``, and if this variable
+is set, will not consider tabs as errors. (This means you are on your
+own if some lines happen to indent using spaces.) You can override
+this behavior (if you desire) by customizing
+``ethan-wspace-errors-in-buffer-hook``, using something like::
 
-    (defun makefile-tabs-are-less-evil ()
-      (setq ethan-wspace-errors (remove 'tabs ethan-wspace-errors)))
-    (add-hook 'makefile-mode-hook 'makefile-tabs-are-less-evil)
+    (defun i-still-really-hate-tabs ()
+      (if (not (member 'tabs ethan-wspace-errors))
+         (setq ethan-wspace-errors (cons 'tabs ethan-wspace-errors))))
+    (add-hook 'ethan-wspace-errors-in-buffer-hook 'i-still-really-hate-tabs)
+
 
 Perhaps you are one of those bizarre creatures who uses `Smart Tabs
 <http://www.emacswiki.org/emacs/SmartTabs>`_. In that case, you are
@@ -123,6 +130,9 @@ errors, which you might find distracting. In that case, I recommend
 something like the following::
 
     (set-default 'ethan-wspace-errors (remove 'tabs ethan-wspace-errors))
+
+We don't have an error type yet for smart tabs, but patches to add one
+would be welcome.
 
 How to use it
 =============

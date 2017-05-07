@@ -799,6 +799,10 @@ customizations.  Otherwise, please file a bug report, as some
 other code has turned on `require-final-newline'.")
           (setq require-final-newline nil))
 
+        (when indent-tabs-mode
+          (setq ethan-wspace-errors
+                (remove 'tabs ethan-wspace-errors)))
+
         (run-hooks 'ethan-wspace-errors-in-buffer-hook)
         (ethan-wspace-update-buffer)
         (add-hook 'pre-command-hook 'ethan-wspace-pre-command-hook nil t)
