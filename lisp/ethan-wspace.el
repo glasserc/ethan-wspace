@@ -845,9 +845,15 @@ other code has turned on `require-final-newline'.")
 
 (defun ethan-wspace-clean-before-save-hook ()
   (when ethan-wspace-mode
-    (dolist (type ethan-wspace-errors)
-      (when (ethan-wspace-type-clean-mode-active type)
-          (ethan-wspace-type-clean type)))))
+    ;; many-nls-eof cleanup can be confused if the last line has spaces on
+    ;; it, so run eol first.
+    (let ((ordered-errors
+           (if (not (member 'eol ethan-wspace-errors))
+               ethan-wspace-errors
+             (cons 'eol (remove 'eol ethan-wspace-errors)))))
+      (dolist (type ordered-errors)
+        (when (ethan-wspace-type-clean-mode-active type)
+          (ethan-wspace-type-clean type))))))
 
 (add-hook 'before-save-hook 'ethan-wspace-clean-before-save-hook)
 
