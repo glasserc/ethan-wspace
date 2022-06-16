@@ -1,73 +1,37 @@
-ethan-wspace
+ethan-wspace: an opinionated emacs configuration for handling whitespace
+========================================================================
+
+The problem: spurious git diffs when whitespace changes happen.
+
+When text and code does not have a canonical form, it's possible for
+someone to change from one form to another without intending to or
+noticing. As an example, someone can add or remove whitespace "after"
+the text on the end of a line without changing its meaning.
+
+A common solution to this is to automatically "clean" whitespace on
+every save. But this can introduce its own spurious diffs when working
+on a file that isn't already clean.
+
+The solution: ``ethan-wspace``.
+
+How it works
 ============
 
-Presenting, with tongue firmly in cheek: ethan-wspace, the definitive
-emacs customizations for people who are OCD about whitespace.
+When ``ethan-wspace`` is activated in a buffer, it examines the
+whitespace in that buffer and does different things depending on
+whether that whitespace is clean or dirty.
 
-It is BSD licensed and currently only 44 kb.  You really have no
-reason not to use it.
+- If the whitespace is dirty, then ``ethan-wspace`` will highlight the
+  "errors", so you can be cognizant of where the whitespace is already
+  dirty. This can help you preserve the whitespace as-is, although it
+  does not prevent you from introducing new errors.
 
-Motivation
-==========
-
-You may have some opinions about whitespace in your source code. They
-may even amount to preferences. However, it takes a seriously twisted
-person to think about whitespace obsessively. I have. Unless you
-demonstrate that you are OCD enough to think about these things for
-hours, I will conclude that I know more about these things than you
-do. And I will be right.
-
-No matter how many opinions you have, I have more. And that makes mine
-more correct.
-
-So what?
-========
-
-You're probably thinking, "Who cares?" And you'd be right. I sincerely
-doubt using these customizations will make your life as a programmer
-even 1% more productive. 1% is nothing. You'd do better to buy a
-bigger monitor.
-
-So then, why be OCD about whitespace? It boils down to one essential
-thing: diffs like these.
-
-::
-
-    $ git diff
-    diff --git a/foo.c b/foo.c
-    index 7be6eb3..8ba98ba 100644
-    --- a/foo.c
-    +++ b/foo.c
-    @@ -1,6 +1,6 @@
-     #include <stdio.h>
-
-    -int main(){
-    +int main(){  
-       printf("hello world\n");
-       return 0;
-     }
-
-What's going on in this diff? Take a few minutes to study it and figure out what's going on. What did I change? It doesn't look like I changed anything! But in fact there's a diff, so there must be some change, right?
-
-The answer is that I either introduced or removed whitespace at the end of the line. ``git diff`` will highlight, in red, trailing whitespace like this that you added, but not that you took away. (P.S. ReStructuredText is removing the trailing whitespace from the example, but if you look at the rst source you will see that it is there.)
-
-Reviewing diffs with whitespace changes is annoying. Trying to guess what the whitespace changes were, so you can undo the whitespace changes, is downright tedious. Ideally you should never have to do these things.
-
-ethan-wspace can help.
-
-What does it do?
-================
-
-ethan-wspace takes the approach of *do no harm*. Specifically, when you open a file:
-
-- If the whitespace is already clean, ethan-wspace inserts hooks to
-  clean the whitespace before every save.
-
-- If the whitespace is not already clean, ethan-wspace highlights
-  errors. It doesn't clean the whitespace without you asking for it,
-  so you don't get spurious whitespace changes in your diffs. It
-  doesn't prevent you from introducing new errors, but hopefully you
-  will be cognizant of the errors in the file.
+- If the whitespace is already clean, then ``ethan-wspace`` will
+  insert hooks to clean this whitespace on save. This will ensure that
+  the whitespace remains clean, even if you introduce errors
+  yourself. Because the whitespace will be automatically cleaned,
+  there is no need to display whitespace specially, and no
+  highlighting is added.
 
 ethan-wspace recognizes the following categories of whitespace errors:
 
@@ -80,8 +44,7 @@ ethan-wspace recognizes the following categories of whitespace errors:
 4. tabs, at all (``tabs``).
 
 It recognizes these categories independently, and treats each category
-as clean or not-clean. The goal is always to make your diffs
-unambiguous. Laudable goal, right?
+as clean or not-clean.
 
 ethan-wspace also has one other fancy feature. If you are editing some
 line, and are writing something at the end of it, and have added some
@@ -96,61 +59,8 @@ saved, and the spaces will be re-added for your convenience\
        "clean" even though its contents are not exactly what is on
        disk.
 
-My tabs! Get your hands off my tabs!
-====================================
-
-It is my opinion (and remember, my opinions are right) that you should
-never, ever have tabs in your source code, at all. If you disagree,
-please see `Tabs Are Evil
-<http://www.emacswiki.org/emacs/TabsAreEvil>`_ on the EmacsWiki. This
-was once a holy war, and then for a time it was settled, but these
-days, the idea that tabs are acceptable is making a resurgence due to
-`gofmt <https://golang.org/cmd/gofmt/>`_.
-
-You may be unfortunate enough to have to deal with files where tabs
-are significant or even common. Apart from go code, there are also
-Makefiles, where tabs are essential. Current versions of
-``ethan-wspace`` check for ``indent-tabs-mode``, and if this variable
-is set, will not consider tabs as errors. (This means you are on your
-own if some lines happen to indent using spaces.) You can override
-this behavior (if you desire) by customizing
-``ethan-wspace-errors-in-buffer-hook``, using something like::
-
-    (defun i-still-really-hate-tabs ()
-      (if (not (member 'tabs ethan-wspace-errors))
-         (setq ethan-wspace-errors (cons 'tabs ethan-wspace-errors))))
-    (add-hook 'ethan-wspace-errors-in-buffer-hook 'i-still-really-hate-tabs)
-
-
-Perhaps you are one of those bizarre creatures who uses `Smart Tabs
-<http://www.emacswiki.org/emacs/SmartTabs>`_. In that case, you are
-even more OCD about whitespace than I am, and in a twisted way I
-salute you. However, ``ethan-wspace`` by default treats tabs as
-errors, which you might find distracting. In that case, I recommend
-something like the following::
-
-    (set-default 'ethan-wspace-errors (remove 'tabs ethan-wspace-errors))
-
-We don't have an error type yet for smart tabs, but patches to add one
-would be welcome.
-
-How to use it
-=============
-
-N.B. There's now a recipe for ethan-wspace in el-get!  To use it, add
-something like the following to your el-get-sources::
-
-    (:name ethan-wspace
-           :after (lambda () (global-ethan-wspace-mode 1)))
-
-If you're not using el-get, you need to manually make sure to add the
-``lisp`` directory to your ``load-path``, and then ``(require
-'ethan-wspace)``. In other words, add to your ``init.el`` something
-like the following::
-
-    (add-to-list 'load-path (expand-file-name "~/.emacs.d/upstream/ethan-wspace.git/lisp"))
-    (require 'ethan-wspace)
-    (global-ethan-wspace-mode 1)
+Installation
+============
 
 You should also remove any customizations you have made to turn on
 either ``show-trailing-whitespace`` or ``require-final-newline``; we
@@ -162,6 +72,26 @@ turned on by some modes based on the value of
 
    (custom-set-variable
      '(mode-require-final-newline nil))
+
+``ethan-wspace`` is in MELPA and can be installed using
+``package-install``. If you use ``use-package``, a sample config might be::
+
+  (use-package ethan-wspace
+    :ensure t
+    :config
+    (setq mode-require-final-newline nil)
+    (global-ethan-wspace-mode 1))
+
+Otherwise, you can manually add the ``lisp`` directory to your
+``load-path``, and then ``(require 'ethan-wspace)``. In other words,
+add to your ``init.el`` something like the following::
+
+    (add-to-list 'load-path (expand-file-name "~/.emacs.d/upstream/ethan-wspace.git/lisp"))
+    (require 'ethan-wspace)
+    (global-ethan-wspace-mode 1)
+
+Usage
+=====
 
 When you open files (N.B. but not non-file buffers), bad whitespace
 will be highlit and clean whitespace will be maintained by cleaning
@@ -248,8 +178,62 @@ to be the most egotistically-named package.) ``ethan-wspace`` subsumes most of t
   a library that has lots of faces to show tabs, trailing whitespace,
   and "hard spaces". ``ethan-wspace`` obsoletes this mode too.
 
+FAQ
+===
+
+Who cares?
+----------
+
+Honestly, you're right. I sincerely doubt using these customizations
+will make your life as a programmer even 1% more productive. 1% is
+nothing. You'd do better to buy a bigger monitor.
+
+I just hate spurious git diffs so much. And when I was working on a
+codebase with dirty files, I couldn't just clean everything without
+making my subsequent PRs dirty too. If I accidentally cleaned
+something, I'd have to carefully undo the cleaning so my commits
+didn't include it. A nightmare! ``ethan-wspace`` is the result.
+
+My tabs! Get your hands off my tabs!
+------------------------------------
+
+It is my opinion (and remember, my opinions are right) that you should
+never, ever have tabs in your source code, at all. If you disagree,
+please see `Tabs Are Evil
+<http://www.emacswiki.org/emacs/TabsAreEvil>`_ on the EmacsWiki. This
+was once a holy war, and then for a time it was settled, but these
+days, the idea that tabs are acceptable is making a resurgence due to
+`gofmt <https://golang.org/cmd/gofmt/>`_.
+
+You may be unfortunate enough to have to deal with files where tabs
+are significant or even common. Apart from go code, there are also
+Makefiles, where tabs are essential. Current versions of
+``ethan-wspace`` check for ``indent-tabs-mode``, and if this variable
+is set, will not consider tabs as errors. (This means you are on your
+own if some lines happen to indent using spaces.) You can override
+this behavior (if you desire) by customizing
+``ethan-wspace-errors-in-buffer-hook``, using something like::
+
+    (defun i-still-really-hate-tabs ()
+      (if (not (member 'tabs ethan-wspace-errors))
+         (setq ethan-wspace-errors (cons 'tabs ethan-wspace-errors))))
+    (add-hook 'ethan-wspace-errors-in-buffer-hook 'i-still-really-hate-tabs)
+
+
+Perhaps you are one of those bizarre creatures who uses `Smart Tabs
+<http://www.emacswiki.org/emacs/SmartTabs>`_. In that case, you are
+even more OCD about whitespace than I am, and in a twisted way I
+salute you. However, ``ethan-wspace`` by default treats tabs as
+errors, which you might find distracting. In that case, I recommend
+something like the following::
+
+    (set-default 'ethan-wspace-errors (remove 'tabs ethan-wspace-errors))
+
+We don't have an error type yet for smart tabs, but patches to add one
+would be welcome.
+
 More ranting about Tabs Are Evil
-================================
+--------------------------------
 
 Required reading for this discussion is JWZ's "famous" `tabs versus
 spaces <http://www.jwz.org/doc/tabs-vs-spaces.html>`_ post. He
@@ -277,7 +261,7 @@ the last line of this code?
         main.Application(config, sys.argv, time.time(),
                          docutils.parsers.rst.directives.images.Image)
 
-If you said "five tabs, one space" -- you lose. Because then when you move to Jan's machine, where tabs are two spaces, you find::
+If you said "five tabs, one space" -- you lose. Because then when you move to Jean's machine, where tabs are two spaces, you find::
 
     if __name__ == '__main__':
         main.Application(config, sys.argv, time.time(),
