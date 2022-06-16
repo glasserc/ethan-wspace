@@ -46,18 +46,40 @@ ethan-wspace recognizes the following categories of whitespace errors:
 It recognizes these categories independently, and treats each category
 as clean or not-clean.
 
-ethan-wspace also has one other fancy feature. If you are editing some
-line, and are writing something at the end of it, and have added some
-spaces, but your cursor is just after those spaces, the spaces aren't
-considered "trailing" yet. They won't be highlit if you are in
-``highlight-eol-mode``. If you are in ``clean-eol-mode``, and you
-should save the buffer, the spaces will be cleaned, the buffer will be
-saved, and the spaces will be re-added for your convenience\
-[1]_. Similar behavior exists for newlines-at-end-of-file.
+eol
+---
+
+If you are editing some line, and are writing something at the end of
+it, and have added some spaces, but your cursor is just after those
+spaces, the spaces aren't considered "trailing" yet. They won't be
+highlit if you are in ``highlight-eol-mode``. If you are in
+``clean-eol-mode``, and you should save the buffer, the spaces will be
+cleaned, the buffer will be saved, and the spaces will be re-added for
+your convenience\ [1]_. Similar behavior exists for
+newlines-at-end-of-file.
 
 .. [1] This may have the surprising behavior that your file appears
        "clean" even though its contents are not exactly what is on
        disk.
+
+tabs
+----
+
+Some file formats (notably Makefiles) treat tabs as syntactically
+significant. Tabs in these files are not errors but are actually
+required. To try to accommodate these files, ``ethan-wspace`` will
+check the value of the variable ``indent-tabs-mode``. If set, tabs
+will not be considered errors (so they will neither be highlit nor
+converted to spaces on saves). However, this means you are on your
+own if some lines happen to indent using spaces.
+
+You can override this behavior (if you desire) by customizing
+``ethan-wspace-errors-in-buffer-hook``, using something like::
+
+    (defun i-still-really-hate-tabs ()
+      (if (not (member 'tabs ethan-wspace-errors))
+         (setq ethan-wspace-errors (cons 'tabs ethan-wspace-errors))))
+    (add-hook 'ethan-wspace-errors-in-buffer-hook 'i-still-really-hate-tabs)
 
 Installation
 ============
@@ -194,6 +216,17 @@ making my subsequent PRs dirty too. If I accidentally cleaned
 something, I'd have to carefully undo the cleaning so my commits
 didn't include it. A nightmare! ``ethan-wspace`` is the result.
 
+Who died and made you absolute ruler of whitespace?
+---------------------------------------------------
+
+Listen. You may have some opinions about whitespace in your source
+code. They may even amount to preferences. However, it takes a
+seriously twisted person to think about whitespace obsessively. I
+have.
+
+The fact is that I simply have more opinions about whitespace than you
+do. That makes mine more correct.
+
 My tabs! Get your hands off my tabs!
 ------------------------------------
 
@@ -204,21 +237,6 @@ please see `Tabs Are Evil
 was once a holy war, and then for a time it was settled, but these
 days, the idea that tabs are acceptable is making a resurgence due to
 `gofmt <https://golang.org/cmd/gofmt/>`_.
-
-You may be unfortunate enough to have to deal with files where tabs
-are significant or even common. Apart from go code, there are also
-Makefiles, where tabs are essential. Current versions of
-``ethan-wspace`` check for ``indent-tabs-mode``, and if this variable
-is set, will not consider tabs as errors. (This means you are on your
-own if some lines happen to indent using spaces.) You can override
-this behavior (if you desire) by customizing
-``ethan-wspace-errors-in-buffer-hook``, using something like::
-
-    (defun i-still-really-hate-tabs ()
-      (if (not (member 'tabs ethan-wspace-errors))
-         (setq ethan-wspace-errors (cons 'tabs ethan-wspace-errors))))
-    (add-hook 'ethan-wspace-errors-in-buffer-hook 'i-still-really-hate-tabs)
-
 
 Perhaps you are one of those bizarre creatures who uses `Smart Tabs
 <http://www.emacswiki.org/emacs/SmartTabs>`_. In that case, you are
@@ -279,16 +297,21 @@ about whitespace issues obsessively enough. Rejoice! There is a place
 for you in normal society.
 
 It's due to code above that truly demented people will suggest using
-tabs for *blocks only* and *spaces within blocks*. I've seen this rule
-propounded on Reddit, for example. In the above code, that gives you
-"one tab, seventeen spaces". I've never tried this approach on a
-real project, for the simple fact that people are lazy and source-code
-editors are imperfect, and somewhere, somehow, I am certain to come
-across spaces where there should be tabs, or tabs where there should
-be spaces. And then I will be furious.
+tabs for *blocks only* and *spaces within blocks*. This is the "Smart
+Tabs" approach mentioned above. In the above code, that gives you "one
+tab, seventeen spaces". I've never seen a project with this as the
+coding standard, and I'll never suggest it for a real project, for the
+simple fact that people are lazy and source-code editors are
+imperfect, and somewhere, somehow, I am certain to come across spaces
+where there should be tabs, or tabs where there should be spaces. And
+then I will be furious.
 
-(If I worked on a project with a team of sharpshooter programmers who
-all agreed on the tabs-for-scope-plus-spaces-for-alignment rule, I'd
-investigate configuring emacs to do this. But until then I rely on the
-far easier expedient of just outlawing tabs in source code entirely
-and consigning them to the dustbin of history.)
+Rather than try to ensure complete compliance with this extremely
+complicated rule for source code formatting, I have set my sights on
+the simpler expedient of just outlawing tabs in source code entirely
+and consigning them to the dustbin of history.
+
+Licensing
+=========
+
+``ethan-wspace`` is released under a BSD license (see ``COPYING``).
