@@ -14,6 +14,8 @@ on a file that isn't already clean.
 
 The solution: ``ethan-wspace``.
 
+.. image:: screenshot.png
+
 How it works
 ============
 
