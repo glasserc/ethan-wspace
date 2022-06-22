@@ -14,8 +14,6 @@ on a file that isn't already clean.
 
 The solution: ``ethan-wspace``.
 
-.. image:: screenshot.png
-
 How it works
 ============
 
@@ -34,6 +32,13 @@ whether that whitespace is clean or dirty.
   yourself. Because the whitespace will be automatically cleaned,
   there is no need to display whitespace specially, and no
   highlighting is added.
+
+It looks like this:
+
+.. image:: screenshot.png
+
+Errors
+======
 
 ethan-wspace recognizes the following categories of whitespace errors:
 
