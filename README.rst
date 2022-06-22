@@ -1,5 +1,5 @@
-ethan-wspace: an opinionated emacs configuration for handling whitespace
-========================================================================
+ethan-wspace: a non-intrusive emacs configuration for handling whitespace
+=========================================================================
 
 The problem: spurious git diffs when whitespace changes happen.
 
