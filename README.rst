@@ -42,37 +42,35 @@ What am I looking at
 
 When you open files (N.B. but not non-file buffers), bad whitespace
 will be highlit and clean whitespace will be maintained by cleaning
-just before files are saved. You can switch from one to the other
-using ``M-x ethan-wspace-highlight-FOO-mode`` or ``M-x
-ethan-wspace-clean-FOO-mode`` (each mode disables the other).  If you
-want to clean all kinds of whitespace, you can use ``M-x
+just before files are saved. There's also a mode line "lighter" for
+``ethan-wspace`` which looks something like ``ew:mnLt``. Each letter
+corresponds to a kind of whitespace (see "Errors", below). Lower case
+letters indicate categories of whitespace which will be cleaned before
+save; upper case letters indicate categories which are being
+highlit.
+
+You can switch from one to the other using ``M-x
+ethan-wspace-highlight-FOO-mode`` or ``M-x
+ethan-wspace-clean-FOO-mode`` (each mode disables the other). You can
+also click on the corresponding letter in the modeline lighter, which
+will switch from cleaning to highlighting or back.
+
+If you want to clean all kinds of whitespace, you can use ``M-x
 ethan-wspace-clean-all``, which immediately cleans everything and
 switches to clean-before-save on all whitespace types.
-
-There's also a mode line "lighter" for ``ethan-wspace`` which looks
-something like ``ew:mnLt``. Lower case letters indicate categories of
-whitespace which will be cleaned before save; upper case letters
-indicate categories which are being highlit. You can click on a
-particular letter to change from one to the other.
-
-You might also want to customize the face used to highlight erroneous
-whitespace. This is configurable by ``ethan-wspace-face``. A default
-face is computed based on the background of your frame when
-``ethan-wspace`` was ``require``\ d (so you might want to make your
-calls to ``color-theme`` first).
 
 Errors
 ======
 
 ethan-wspace recognizes the following categories of whitespace errors:
 
-1. trailing whitespace at end of line (``eol``).
+1. trailing whitespace at end of line (``eol``, modeline letter ``L`` for "end of Line").
 
-2. no trailing newline (``no-nl-eof``).
+2. no trailing newline (``no-nl-eof``, modeline letter ``N`` for "No trailing newline").
 
-3. more than one trailing newline (``many-nls-eof``).
+3. more than one trailing newline (``many-nls-eof``, modeline letter ``M`` for "Many trailing newlines").
 
-4. tabs, at all (``tabs``).
+4. tabs, at all (``tabs``, modeline letter ``T``).
 
 It recognizes these categories independently, and treats each category
 as clean or not-clean.
@@ -142,6 +140,12 @@ add to your ``init.el`` something like the following::
     (add-to-list 'load-path (expand-file-name "~/.emacs.d/upstream/ethan-wspace.git/lisp"))
     (require 'ethan-wspace)
     (global-ethan-wspace-mode 1)
+
+You might also want to customize the face used to highlight erroneous
+whitespace. This is configurable by ``ethan-wspace-face``. A default
+face is computed based on the background of your frame when
+``ethan-wspace`` was ``require``\ d (so you might want to make your
+calls to ``color-theme`` first).
 
 Relationship to other emacs things
 ==================================
