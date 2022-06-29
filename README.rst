@@ -33,6 +33,12 @@ whether that whitespace is clean or dirty.
   there is no need to display whitespace specially, and no
   highlighting is added.
 
+``ethan-wspace`` does this at a granular level for different kinds of
+whitespace problems: tabs, newlines at end of file, trailing
+whitespace. The categories of whitespace that are cleaned will be
+maintained by cleaning on save, and the ones that are dirty will be
+highlit.
+
 It looks like this:
 
 .. image:: screenshot.png
