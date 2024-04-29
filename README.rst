@@ -127,7 +127,7 @@ turned on by some modes based on the value of
 
 ::
 
-   (custom-set-variable
+   (custom-set-variables
      '(mode-require-final-newline nil))
 
 ``ethan-wspace`` is in MELPA and can be installed using
