@@ -1,4 +1,4 @@
-;;; ethan-wspace.el --- whitespace customizations for emacs
+;;; ethan-wspace.el --- whitespace customizations for emacs -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2010-2011 Ethan Glasser-Camp
 ;;
